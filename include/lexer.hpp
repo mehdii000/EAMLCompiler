@@ -5,8 +5,10 @@
 enum class TokenType {
     AT_SYMBOL,
     IDENTIFIER,
-    STRING,
     COLON,
+    STRING,
+    NUMBER,
+    COMMA,
     LBRACKET,
     RBRACKET,
     NEWLINE,
