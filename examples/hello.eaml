@@ -1,4 +1,4 @@
 @title "Example Page"
 
-@define screen main:
-    @text "hello there stranger!"
+@screen main:
+    @text "Hello, World!"
