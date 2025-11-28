@@ -2,7 +2,7 @@
 
 > A human-readable markup language that compiles to HTML/CSS, designed for teaching web design to beginners.
 
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
+[![C++17](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/17)
 
 ---
 
