@@ -1,4 +1,5 @@
-@title "Example Page"
-
 @screen main:
     @text "Hello, World!"
+
+16 : ; 
+@set "grrr" as "ggg"

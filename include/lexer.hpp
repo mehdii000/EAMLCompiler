@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <optional>
 
 enum class TokenType {
     AT_SYMBOL,
@@ -18,9 +19,8 @@ enum class TokenType {
 
 struct Token {
     TokenType type;
-    std::string value;
-    int line;
-    int column;
+    std::optional<std::string> value;
+    size_t line;
 };
   
 class Lexer {
@@ -31,6 +31,5 @@ public:
 private:
     std::string source;
     size_t pos = 0;
-    int line = 1;
-    int col = 1;
+    size_t line = 1;
 };

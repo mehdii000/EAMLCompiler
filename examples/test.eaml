@@ -5,7 +5,7 @@
 @define greeting_card [bordered]:
     @text "Hello There {name} i am {age} old"
     @row [gap: 10px]:
-        @text "Click for a suprise -> "
+        @text "Click for a suprise"
         @button "Click"
 
 @screen main_screen [center_items]:
