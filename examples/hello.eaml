@@ -1,5 +1,6 @@
 @screen main:
     @text "Hello, World!"
-
-16 : ; 
-@set "grrr" as "ggg"
+    @row:
+        @button "Click 1" [rounded]
+        @button "Click 2"
+        @button "Click 3"

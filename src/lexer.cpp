@@ -6,86 +6,123 @@ Lexer::Lexer(const std::string& source) : source(source) {}
 
 std::vector<Token> Lexer::tokenize() {
     std::vector<Token> tokens;
-    size_t sourceLength = source.length();
+    const size_t len = source.length();
 
-    while (pos < sourceLength) {
+    while (pos < len) {
         char c = source[pos];
 
+        /** IDENTIFIER */
         if (std::isalpha(c)) {
-            std::string identifier;
-            while (pos < sourceLength && std::isalnum(source[pos])) {
-                identifier += source[pos];
-                pos++;
+            std::string id;
+            while (pos < len && std::isalnum(source[pos])) {
+                id += source[pos++];
             }
-            tokens.push_back({TokenType::IDENTIFIER, identifier, line});
+            tokens.push_back({TokenType::IDENTIFIER, id, line});
             continue;
-        } else if (std::isdigit(c)) {
+        }
+
+        /** NUMBER */
+        if (std::isdigit(c)) {
             std::string number;
-            while (pos < sourceLength && std::isdigit(source[pos])) {
-                number += source[pos];
-                pos++;
+            while (pos < len && std::isdigit(source[pos])) {
+                number += source[pos++];
             }
             tokens.push_back({TokenType::NUMBER, number, line});
             continue;
-        } else if (c == ' ') {
-            // Make sure pos+3 is valid BEFORE accessing those indices
-            if (pos + 3 < sourceLength &&
-                source[pos+1] == ' ' &&
-                source[pos+2] == ' ' &&
-                source[pos+3] == ' ') {
-
-                tokens.push_back({TokenType::INDENT, std::nullopt, line});
-                pos += 3;
-            }
-        } else if (c == '\n') {
-            tokens.push_back({TokenType::NEWLINE, std::nullopt, line});
-            line++;
-            pos++;
-        } else if (c == '"') {
-            std::string string;
-            pos++;
-            while (pos < sourceLength && source[pos] != '"') {
-                string += source[pos];
-                pos++;
-            }
-            if (pos == sourceLength) {
-                throw std::runtime_error("Unterminated string");
-            }
-            tokens.push_back({TokenType::STRING, string, line});
-            pos++;
-        } else if (c == EOF) {
-            tokens.push_back({TokenType::END_OF_FILE, std::nullopt, line});
-            break;
         }
 
+        /** INDENTATION (4 spaces) */
+        if (c == ' ') {
+            if (pos + 3 < len &&
+                source[pos+1] == ' ' &&
+                source[pos+2] == ' ' &&
+                source[pos+3] == ' ') 
+            {
+                tokens.push_back({TokenType::INDENT, std::nullopt, line});
+                pos += 4;
+                continue;
+            }
 
-        // Single-character tokens
+            // Single spaces are ignored
+            pos++;
+            continue;
+        }
+
+        /** NEWLINE */
+        if (c == '\n') {
+            tokens.push_back({TokenType::NEWLINE, std::nullopt, line});
+            pos++;
+            line++;
+            continue;
+        }
+
+        /** STRINGS */
+        if (c == '"') {
+            pos++; // skip opening "
+            std::string value;
+
+            while (pos < len) {
+                char s = source[pos];
+
+                // escape support \" and \\ 
+                if (s == '\\' && pos + 1 < len) {
+                    char next = source[pos + 1];
+                    if (next == '"' || next == '\\') {
+                        value += next;
+                        pos += 2;
+                        continue;
+                    }
+                }
+
+                if (s == '"') break;
+
+                value += s;
+                pos++;
+            }
+
+            if (pos >= len)
+                throw std::runtime_error("Unterminated string literal");
+
+            pos++; // skip closing "
+            tokens.push_back({TokenType::STRING, value, line});
+            continue;
+        }
+
+        /** SINGLE-CHAR TOKENS */
         switch (c) {
             case '@':
                 tokens.push_back({TokenType::AT_SYMBOL, "@", line});
                 pos++;
-                break;
+                continue;
+
             case ':':
                 tokens.push_back({TokenType::COLON, ":", line});
                 pos++;
-                break;
+                continue;
+
             case ',':
                 tokens.push_back({TokenType::COMMA, ",", line});
                 pos++;
-                break;
+                continue;
+
             case '[':
                 tokens.push_back({TokenType::LBRACKET, "[", line});
                 pos++;
-                break;
+                continue;
+
             case ']':
                 tokens.push_back({TokenType::RBRACKET, "]", line});
                 pos++;
-                break;
-            default:
-                pos++;
-                break;
+                continue;
         }
+
+        /** UNKNOWN CHARACTER */
+        throw std::runtime_error(
+            std::string("Unexpected character '") + c +
+            "' at line " + std::to_string(line)
+        );
     }
 
+    tokens.push_back({TokenType::END_OF_FILE, std::nullopt, line});
     return tokens;
 }
