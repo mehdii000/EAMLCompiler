@@ -6,7 +6,6 @@
 
 enum class TokenType {
 
-    AT_KEYWORD,
     AT_TITLE,
     AT_CONSTANT,
     AT_SAVE,

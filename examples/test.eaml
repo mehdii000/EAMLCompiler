@@ -1,5 +1,16 @@
 @title "hey"
 
+# this is a comment
+
+
+
+
 @screen main:
     @button "hey"
     @text "this is some text"
+
+    @row:
+        @text "hello"
+        @button "hei"
+
+    @text "hello"

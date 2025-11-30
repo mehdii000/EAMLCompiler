@@ -7,7 +7,6 @@
 
 std::string getType(TokenType type) {
     switch (type) {
-        case TokenType::AT_KEYWORD: return "AT_KEYWORD";
         case TokenType::AT_TITLE: return "AT_TITLE";
         case TokenType::AT_CONSTANT: return "AT_CONSTANT";
         case TokenType::AT_SAVE: return "AT_SAVE";
@@ -40,28 +39,35 @@ int main(int argc, char const *argv[])
     }
 
     std::string source = readFile(argv[1]);
-    
-    std::cout << "====== SOURCE =======" << std::endl;
-    std::cout << source;
-    std::cout << "=====================" << std::endl << std::endl;
 
     // Lexing
-    std::cout << "====== TOKENS =======" << std::endl;
+    std::cout << "Tokenizing..." << std::endl;
+
     std::vector<Token> tokens;
     Lexer lexer(source);
     tokens = lexer.tokenize();
-    
-    for (Token token : tokens) {
-        std::cout << getType(token.type);
-        if (token.value.has_value()) {
-            std::cout << " -> " << token.value.value();
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "=====================" << std::endl << std::endl;
 
-    // Parsing
-    std::cout << "======== AST ========" << std::endl;
+    for (const Token& token : tokens) {
+        std::string token_type_str = getType(token.type);
+        
+        if (token_type_str == "NEWLINE") {
+            std::cout << "\n";
+        } 
+        else if (token_type_str == "INDENT") {
+            std::cout << "-> ";
+        }
+        else if (token.value.has_value()) {
+            // For all other tokens (IDENTIFIER, STRING, etc.)
+            std::cout << token.value.value() << " ";
+        } else {
+            std::cout << token_type_str << " ";
+        }
+    }
+
+    std::cout << std::endl;
+
+    /* Parsing
+    std::cout << "Parsing..." << std::endl << "---------------------------------------------" << std::endl;
     try {
         Parser parser(tokens);
         auto ast = parser.parse();
@@ -70,7 +76,7 @@ int main(int argc, char const *argv[])
         std::cerr << "Parse error: " << e.what() << std::endl;
         return 1;
     }
-    std::cout << "=====================" << std::endl;
+    */
 
     return 0;
 }

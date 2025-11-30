@@ -56,11 +56,21 @@ std::vector<Token> Lexer::tokenize() {
             continue;
         }
 
-        /** NEWLINE */
+        /** NEWLINE **/
         if (c == '\n') {
-            tokens.push_back({TokenType::NEWLINE, std::nullopt, line});
+            // 1. Consume the first newline character
             pos++;
-            line++;
+            line++; // The line counter MUST be incremented here
+            
+            // 2. Loop to consume all subsequent consecutive newline characters
+            while (pos < len && source[pos] == '\n') {
+                pos++; 
+                line++; // Increment line counter for every consumed '\n'
+            }
+            
+            // 3. Emit only one token for the entire block of empty lines
+            tokens.push_back({TokenType::NEWLINE, std::nullopt, line});
+            
             continue;
         }
 
@@ -120,7 +130,7 @@ std::vector<Token> Lexer::tokenize() {
 
                     continue;
                 }
-                break;
+                continue;
             }
 
             case ':':
@@ -142,6 +152,14 @@ std::vector<Token> Lexer::tokenize() {
                 tokens.push_back({TokenType::RBRACKET, "]", line});
                 pos++;
                 continue;
+
+            // COMMENTS
+            case '#':
+                while (pos < len && source[pos] != '\n') {
+                    pos++;
+                }
+                continue;
+
             case '{':
             case '}':
                 pos++; // Skipping for now
