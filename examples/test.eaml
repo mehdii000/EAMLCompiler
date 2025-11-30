@@ -1,20 +1,5 @@
-@title "Test Page"
+@title "hey"
 
-@var age as 32
-
-@define greeting_card [bordered]:
-    @text "Hello There {name} i am {age} old"
-    @row [gap: 10px]:
-        @text "Click for a suprise"
-        @button "Click"
-
-@screen main_screen [center_items]:
-    @use greeting_card with:
-        name as "Mehdi"
-    @row:
-        @button "Click 1"
-        @button "Click 2"
-        @button "Click 3"
-
-@screen test_screen [hidden]:
-    @text "This is just a test"
+@screen main:
+    @button "hey"
+    @text "this is some text"

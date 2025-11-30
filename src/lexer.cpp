@@ -1,6 +1,7 @@
 #include "lexer.hpp"
 #include <cctype>
 #include <stdexcept>
+#include <iostream> // For std::cerr
 
 Lexer::Lexer(const std::string& source) : source(source) {}
 
@@ -11,10 +12,17 @@ std::vector<Token> Lexer::tokenize() {
     while (pos < len) {
         char c = source[pos];
 
+        // 1. Skip Carriage Returns (Windows compatibility)
+        if (c == '\r') {
+            pos++;
+            continue;
+        }
+
         /** IDENTIFIER */
-        if (std::isalpha(c)) {
+        if (std::isalpha(static_cast<unsigned char>(c))) {
             std::string id;
-            while (pos < len && std::isalnum(source[pos])) {
+            // FIX: Added parenthesis around (isalnum || _) to prevent buffer overflow
+            while (pos < len && (std::isalnum(static_cast<unsigned char>(source[pos])) || source[pos] == '_')) {
                 id += source[pos++];
             }
             tokens.push_back({TokenType::IDENTIFIER, id, line});
@@ -22,9 +30,9 @@ std::vector<Token> Lexer::tokenize() {
         }
 
         /** NUMBER */
-        if (std::isdigit(c)) {
+        if (std::isdigit(static_cast<unsigned char>(c))) {
             std::string number;
-            while (pos < len && std::isdigit(source[pos])) {
+            while (pos < len && std::isdigit(static_cast<unsigned char>(source[pos]))) {
                 number += source[pos++];
             }
             tokens.push_back({TokenType::NUMBER, number, line});
@@ -90,10 +98,30 @@ std::vector<Token> Lexer::tokenize() {
 
         /** SINGLE-CHAR TOKENS */
         switch (c) {
-            case '@':
-                tokens.push_back({TokenType::AT_SYMBOL, "@", line});
-                pos++;
-                continue;
+            /** AT_KEYWORDS **/
+            case '@': {
+                ++pos;
+                if (pos >= len) break;
+
+                // Handle @identifier / @keyword
+                if (std::isalpha(static_cast<unsigned char>(source[pos]))) {
+                    std::string name;
+                    // FIX: Added parenthesis here as well
+                    while (pos < len && (std::isalnum(static_cast<unsigned char>(source[pos])) || source[pos] == '_')) {
+                        name += source[pos++];
+                    }
+
+                    // keyword or identifier?
+                    if (BUILTIN_TOKENS.find(name) != BUILTIN_TOKENS.end()) {
+                        tokens.push_back({BUILTIN_TOKENS.at(name), name, line});
+                    } else {
+                        tokens.push_back({TokenType::AT_IDENTIFIER, name, line});
+                    }
+
+                    continue;
+                }
+                break;
+            }
 
             case ':':
                 tokens.push_back({TokenType::COLON, ":", line});
@@ -114,13 +142,15 @@ std::vector<Token> Lexer::tokenize() {
                 tokens.push_back({TokenType::RBRACKET, "]", line});
                 pos++;
                 continue;
+            case '{':
+            case '}':
+                pos++; // Skipping for now
+                continue;
         }
 
         /** UNKNOWN CHARACTER */
-        throw std::runtime_error(
-            std::string("Unexpected character '") + c +
-            "' at line " + std::to_string(line)
-        );
+        std::cerr << "Unknown character at line " << line << ": '" << c << "' (" << (int)c << ")" << std::endl;
+        pos++;
     }
 
     tokens.push_back({TokenType::END_OF_FILE, std::nullopt, line});

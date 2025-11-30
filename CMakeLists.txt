@@ -14,9 +14,9 @@ include_directories(include)
 # Source files
 set(SOURCES
     src/lexer.cpp
-    src/parser.cpp
     src/analyzer.cpp
     src/codegen.cpp
+    src/parser.cpp
     src/main.cpp
 )
 
