@@ -89,7 +89,7 @@ Create `hello.eaml`:
 ```eaml
 @title "My First Page"
 
-@define screen main:
+@screen main:
     @heading "Hello, EAML!"
     @text "This is my first webpage."
     @button "Click Me"
@@ -135,18 +135,18 @@ Open `output.html` in your browser! 🎉
 ### Components with Parameters
 
 ```eaml
-@define greeting_card [bordered, rounded]:
+@save greeting_card [bordered, rounded]:
     @text "Hello {name}!"
     @text "{message}"
     @button "Reply"
 
-@use greeting_card with:
-    name as "Alice"
-    message as "Welcome to EAML!"
+@load greeting_card with:
+    name: "Alice"
+    message: "Welcome to EAML!"
 
-@use greeting_card with:
-    name as "Bob"
-    message as "Thanks for visiting!"
+@load greeting_card with:
+    name: "Bob"
+    message: "Thanks for visiting!"
 ```
 
 ### Modifiers
@@ -157,6 +157,7 @@ Open `output.html` in your browser! 🎉
 [rounded]               -- Rounded corners
 [shadowed]              -- Drop shadow
 [hidden]                -- Hidden by default
+...
 
 -- Property modifiers
 [gap: 20px]             -- Spacing between items
@@ -168,11 +169,11 @@ Open `output.html` in your browser! 🎉
 ### Screens (Pages)
 
 ```eaml
-@define screen home:
+@screen home:
     @heading "Home Page"
     @text "Welcome!"
 
-@define screen about [hidden]:
+@screen about [hidden]:
     @heading "About"
     @text "Learn more about us."
 ```
@@ -186,13 +187,13 @@ Open `output.html` in your browser! 🎉
 ```eaml
 @title "My Portfolio"
 
-@define project_card [bordered, rounded, shadowed]:
+@save project_card [bordered, rounded, shadowed]:
     @stack [padding: 20px, width: 300px]:
         @heading "{title}"
         @text "{description}"
         @button "View Project"
 
-@define screen main:
+@save screen main:
     @center [padding: 50px]:
         @heading "Hi, I'm Mehdi"
         @text "Student & Developer"
@@ -202,22 +203,22 @@ Open `output.html` in your browser! 🎉
     
     @row [gap: 20px, wrap]:
         @use project_card with:
-            title as "Calculator"
-            description as "A simple calculator app"
+            title: "Calculator"
+            description: "A simple calculator app"
         
-        @use project_card with:
-            title as "Todo List"
-            description as "Task manager"
+        @load project_card with:
+            title: "Todo List"
+            description: "Task manager"
         
-        @use project_card with:
-            title as "Weather App"
-            description as "Real-time weather"
+        @load project_card with:
+            title: "Weather App"
+            description: "Real-time weather"
 ```
 
 ### Contact Form
 
 ```eaml
-@define screen contact:
+@screen contact:
     @center:
         @stack [width: 400px, bordered, padding: 30px]:
             @heading "Get In Touch"
@@ -232,14 +233,11 @@ Open `output.html` in your browser! 🎉
 ## 🗺️ Roadmap
 
 - [x] Think of the project and think about starting it
-- [ ] Basic lexer and parser
-- [ ] Component system
+- [x] Basic lexer and parser
+- [x] Component system
 - [ ] Layout containers (row, stack, center)
 - [ ] Modifier system
-- [ ] Conditional rendering (`@if`)
 - [ ] Loops (`@for`)
-- [ ] Event handlers
-- [ ] Animations
 - [ ] CSS framework integration
 - [ ] Live preview server
 - [ ] VS Code syntax highlighting
@@ -256,4 +254,4 @@ This project is licensed under the GNU 3.0 License
 
 ---
 
-<p align="center">Made with ❤️ for students learning web design</p>
+<p align="center">Made with ❤️ for every curious mind across the globe.</p>
