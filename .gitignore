@@ -33,7 +33,9 @@ lib/
 *.dylib
 *.a
 *.lib
+
 eaml
+output.html
 
 # Testing
 Testing/

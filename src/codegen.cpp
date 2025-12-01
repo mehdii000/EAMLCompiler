@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <functional>
+#include <fstream>
 
 // -------------------------------
 // Deep Clone Support
@@ -120,7 +121,16 @@ void CodeGenerator::generate(RootNode& root) {
     // 2. Expand @load across *all* root statements
     expandLoadsInList(root.statements);
 
-    std::cout << generateHTMLOutput(root) << std::endl;
+    // Create a file and stream the result of generateHTMLOutput on it
+    std::ofstream outFile("output.html");
+    if (outFile.is_open()) {
+        outFile << generateHTMLOutput(root);
+        outFile.close();
+        std::cout << "HTML output generated successfully to output.html" << std::endl;
+    } else {
+        std::cerr << "Error: Unable to open output.html for writing." << std::endl;
+    }
+
 
 }
 
