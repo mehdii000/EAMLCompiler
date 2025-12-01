@@ -8,7 +8,7 @@
 
 ## 🎯 What is EAML?
 
-EAML makes web design accessible. Less Verbose, Write simple, readable code and get subjectvly beautiful HTML/CSS pages.
+EAML makes web design accessible. Write less verbose, resuable, readable code and get subjectvly the same HTML/CSS results.
 
 **Before (HTML):**
 ```html
