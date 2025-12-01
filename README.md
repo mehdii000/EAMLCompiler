@@ -193,7 +193,7 @@ Open `output.html` in your browser! 🎉
         @text "{description}"
         @button "View Project"
 
-@save screen main:
+@screen main:
     @center [padding: 50px]:
         @heading "Hi, I'm Mehdi"
         @text "Student & Developer"
