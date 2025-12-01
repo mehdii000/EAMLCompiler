@@ -22,16 +22,16 @@ EAML makes web design accessible. Write less verbose, resuable, readable code an
     <div class="screen" id="main">
         <h1>Hey there!</h1>
         <button>click me</button>
-        <br></br>
+        <br>
         <div>hey i am Alice</div>
         <div>i am 12 old</div>
-        <br></br>
+        <br>
         <div>hey i am Mehdi</div>
         <div>i am 13 old</div>
-        <br></br>
+        <br>
         <div>hey i am Eve</div>
         <div>i am 16 old</div>
-        <br></br>
+        <br>
     </div>
 </body>
 </html>
