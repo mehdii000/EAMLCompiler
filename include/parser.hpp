@@ -66,7 +66,8 @@ struct LoadStmtNode : ASTNode {
 
 struct GenericAtStmtNode : ASTNode {
     std::string name;
-    GenericAtStmtNode(const std::string& n) : name(n) {}
+    std::string value;
+    GenericAtStmtNode(const std::string& n, const std::string& v = "") : name(n), value(v) {}
     void print(int indent = 0) const override;
 };
 

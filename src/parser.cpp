@@ -349,11 +349,13 @@ std::unique_ptr<LoadStmtNode> Parser::parseLoadStmt(int currentIndent) {
         consume(); // consume newline
 
         component->parameters = std::move(parseParameters(currentIndent));
+
     } else {
         if (peek().type != TokenType::NEWLINE) {
             throw std::runtime_error("Expected newline after load statement at line " + 
                                    std::to_string(peek().line));
         }
+        component->parameters = std::vector<std::unique_ptr<ParameterNode>>();
         consume(); // consume newline
     }
 
@@ -362,12 +364,15 @@ std::unique_ptr<LoadStmtNode> Parser::parseLoadStmt(int currentIndent) {
 
 std::unique_ptr<GenericAtStmtNode> Parser::parseGenericAtStmt(int currentIndent) {
     std::string genericName = consume().value.value(); // consume and return @<value>
+
+    std::string headerValue = peek().type == TokenType::STRING ? consume().value.value() : "";
+
     if (peek().type != TokenType::NEWLINE)
         throw std::runtime_error("Expected newline after generic at statement at line " + 
                                std::to_string(peek().line));
     consume(); // consume newline
 
-    return std::make_unique<GenericAtStmtNode>(genericName);
+    return std::make_unique<GenericAtStmtNode>(genericName, headerValue);
 }
 
 std::vector<std::unique_ptr<ParameterNode>> Parser::parseParameters(int parentIndent) {
@@ -409,7 +414,7 @@ std::vector<std::unique_ptr<ParameterNode>> Parser::parseParameters(int parentIn
         }
         consume(); // consume colon
         
-        if (peek().type != TokenType::STRING && peek().type != TokenType::IDENTIFIER) {
+        if (peek().type != TokenType::STRING && peek().type != TokenType::IDENTIFIER && peek().type != TokenType::NUMBER) {
             throw std::runtime_error("Expected value after colon at line " + 
                                    std::to_string(peek().line));
         }

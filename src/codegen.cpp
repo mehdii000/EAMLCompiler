@@ -5,6 +5,31 @@
 #include <functional>
 #include <fstream>
 
+void replaceNodeValueWithAppropriateContext(ASTNode* node, const std::unordered_map<std::string, std::string>& context) {
+    if (!node) return;
+
+    if (auto* param = dynamic_cast<TextStmtNode*>(node)) {
+        std::string txt = param->text;
+        // Replace placeholders like {name} with context values
+        for (auto& [k, v] : context) {
+            size_t pos = 0;
+            std::string ph = "{" + k + "}";
+            while ((pos = txt.find(ph, pos)) != std::string::npos) {
+                txt.replace(pos, ph.length(), v);
+                pos += v.length();
+            }
+        }
+        param->text = txt;
+    }
+
+    if (node->children()) {
+        for (auto& child : *node->children()) {
+            replaceNodeValueWithAppropriateContext(child.get(), context);
+        }
+    }
+}
+
+
 // -------------------------------
 // Deep Clone Support
 // -------------------------------
@@ -67,33 +92,57 @@ std::unique_ptr<ASTNode> CodeGenerator::cloneNode(const ASTNode* node) {
 // Load Expander
 // -------------------------------
 void CodeGenerator::expandLoadsInList(std::vector<std::unique_ptr<ASTNode>>& list) {
-    for (size_t i = 0; i < list.size(); /* increment handled manually */) {
+    for (size_t i = 0; i < list.size(); /* manual increment */) {
 
         ASTNode* raw = list[i].get();
 
-        // Case 1: @load — replace it
+        // ===========================
+        // CASE 1: @load
+        // ===========================
         if (auto* load = dynamic_cast<LoadStmtNode*>(raw)) {
-            auto it = atSaveTable.find(load->name);
 
+            // First expand inside the load node itself if it has childrens
+            if (load->children() && !load->children()->empty()) {
+                expandLoadsInList(*load->children());
+            }
+
+            // Now find the saved template
+            auto it = atSaveTable.find(load->name);
             if (it == atSaveTable.end()) {
                 throw std::runtime_error("Undefined component: @load " + load->name);
             }
 
-            // Remove the @load
+            const auto& savedTemplate = it->second;
+
+            // Build parameter context
+            std::unordered_map<std::string, std::string> paramContext;
+            for (auto& param : load->parameters)
+                paramContext[param->name] = param->value;
+
+            // ---- Remove the load node ----
             list.erase(list.begin() + i);
 
-            // Insert clones of saved nodes
-            const auto& saved = it->second;
+            size_t insertCount = 0;
 
-            for (size_t k = 0; k < saved.size(); k++) {
-                list.insert(list.begin() + i + k, cloneNode(saved[k].get()));
+            // Clone + apply params
+            for (const auto& tpl : savedTemplate) {
+
+                std::unique_ptr<ASTNode> cloned = cloneNode(tpl.get());
+
+                if (!paramContext.empty())
+                    replaceNodeValueWithAppropriateContext(cloned.get(), paramContext);
+
+                list.insert(list.begin() + i + insertCount, std::move(cloned));
+                insertCount++;
             }
 
-            i += saved.size(); // Skip the newly inserted nodes
+            i += insertCount;
             continue;
         }
 
-        // Case 2: A container statement — recurse into children
+        // ===========================
+        // CASE 2: Containers
+        // ===========================
         if (auto* screen = dynamic_cast<ScreenStmtNode*>(raw)) {
             expandLoadsInList(screen->body);
         }
@@ -101,8 +150,7 @@ void CodeGenerator::expandLoadsInList(std::vector<std::unique_ptr<ASTNode>>& lis
             expandLoadsInList(save->body);
         }
 
-        // Default increment
-        i++;
+        i++; // default
     }
 }
 
@@ -180,7 +228,7 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
                 html_header += " " + k + "=\"" + v + "\"";
             }
             out << "<" << html_header << ">\n";
-            out << "Test";
+            out << generic->value;
             out << "</" << html_header << ">\n";
         }
         else if (auto* screen = dynamic_cast<const ScreenStmtNode*>(node)) {

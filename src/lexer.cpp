@@ -41,10 +41,7 @@ std::vector<Token> Lexer::tokenize() {
         /** NUMBER */
         if (std::isdigit(static_cast<unsigned char>(c))) {
             std::string number;
-
-            while (pos < len &&
-                   std::isdigit(static_cast<unsigned char>(source[pos])))
-            {
+            while (pos < len && std::isdigit(static_cast<unsigned char>(source[pos]))) {
                 number += source[pos++];
             }
 

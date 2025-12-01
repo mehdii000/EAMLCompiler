@@ -1,5 +1,20 @@
 @title "Simple Title"
 
+@save card:
+    @text "hey i am {name}"
+    @text "i am {age} old"
+    @br
+
 @screen main:
-    @text "Hello, World!"
-    @button
+    @h1 "Hey there!"
+    @button "click me"
+    @br
+    @load card with:
+        name: "Alice"
+        age: 12
+    @load card with:
+        name: "Mehdi"
+        age: 13
+    @load card with:
+        name: "Eve"
+        age: 16

@@ -1,11 +1,17 @@
 #include <iostream>
 #include <vector>
+#include <filesystem>
+#include <thread>
+#include <chrono>
 
 #include "codeutils.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "anaylzer.hpp"
 #include "codegen.hpp"
+
+using namespace std::chrono_literals;
+namespace fs = std::filesystem;
 
 std::string getType(TokenType type) {
     switch (type) {
@@ -43,7 +49,7 @@ int main(int argc, char const *argv[])
     std::string source = readFile(argv[1]);
 
     // Lexing
-    std::cout << "=========================" << std::endl;
+    //std::cout << "=========================" << std::endl;
     std::cout << "Tokenizing..." << std::endl;
 
     std::vector<Token> tokens;
@@ -71,7 +77,7 @@ int main(int argc, char const *argv[])
     std::cout << std::endl;
 
     Parser parser(tokens);
-    std::cout << "=========================" << std::endl;
+    //std::cout << "=========================" << std::endl;
     std::cout << "Parsing..." << std::endl;
 
     // Begin Parsing
@@ -83,13 +89,39 @@ int main(int argc, char const *argv[])
         Now this essentially just returns the tree
     */
     ast = analyzeTree(std::move(ast));
-    std::cout << "=========HTML============" << std::endl;
+    //std::cout << "=========HTML============" << std::endl;
 
     CodeGenerator codegen;
     codegen.generate(*ast);
-    std::cout << "=========================" << std::endl;
+    //std::cout << "=========================" << std::endl;
 
-    if (argc > 2 && std::string(argv[2]) == "-tree")
-        printPrettyTree(ast.get());
+    if (argc > 2 && std::string(argv[2]) == "-dev") {
+
+        std::string path = argv[1];
+        auto lastWrite = fs::last_write_time(path);
+
+        while (true) {
+
+            auto currentWrite = fs::last_write_time(path);
+
+            if (currentWrite != lastWrite) {
+                lastWrite = currentWrite;
+
+                source = readFile(path.c_str());
+                Lexer lexer_dev(source);
+                std::vector<Token> tokens_dev = lexer_dev.tokenize();
+                Parser parser_dev(tokens_dev);
+                auto ast_dev = parser_dev.parseProgram();
+                ast_dev = analyzeTree(std::move(ast_dev));
+                codegen.generate(*ast_dev);
+                printPrettyTree(ast_dev.get());
+                std::cout << std::endl;
+                std::cout << "Press any Ctrl+C to exit" << std::endl;
+            }
+
+            std::this_thread::sleep_for(100ms); // IMPORTANT
+        }
+    }
+
     return 0;
 }
