@@ -1,7 +1,7 @@
 #include "lexer.hpp"
 #include <cctype>
 #include <stdexcept>
-#include <iostream> // For std::cerr
+#include <iostream>
 
 Lexer::Lexer(const std::string& source) : source(source) {}
 
@@ -12,7 +12,7 @@ std::vector<Token> Lexer::tokenize() {
     while (pos < len) {
         char c = source[pos];
 
-        // 1. Skip Carriage Returns (Windows compatibility)
+        // Ignore CR for Windows compatibility
         if (c == '\r') {
             pos++;
             continue;
@@ -21,74 +21,76 @@ std::vector<Token> Lexer::tokenize() {
         /** IDENTIFIER */
         if (std::isalpha(static_cast<unsigned char>(c))) {
             std::string id;
-            // FIX: Added parenthesis around (isalnum || _) to prevent buffer overflow
-            while (pos < len && (std::isalnum(static_cast<unsigned char>(source[pos])) || source[pos] == '_')) {
+
+            while (pos < len &&
+                   (std::isalnum(static_cast<unsigned char>(source[pos])) || source[pos] == '_'))
+            {
                 id += source[pos++];
             }
 
-            if (BUILTIN_TOKENS.find(id) != BUILTIN_TOKENS.end()) {
-                tokens.push_back({BUILTIN_TOKENS.at(id), id, line});
-                continue;
+            auto it_builtin = BUILTIN_TOKENS.find(id);
+            if (it_builtin != BUILTIN_TOKENS.end()) {
+                tokens.push_back(Token{it_builtin->second, id, line});
+            } else {
+                tokens.push_back(Token{TokenType::IDENTIFIER, id, line});
             }
 
-            tokens.push_back({TokenType::IDENTIFIER, id, line});
             continue;
         }
 
         /** NUMBER */
         if (std::isdigit(static_cast<unsigned char>(c))) {
             std::string number;
-            while (pos < len && std::isdigit(static_cast<unsigned char>(source[pos]))) {
+
+            while (pos < len &&
+                   std::isdigit(static_cast<unsigned char>(source[pos])))
+            {
                 number += source[pos++];
             }
-            tokens.push_back({TokenType::NUMBER, number, line});
+
+            tokens.push_back(Token{TokenType::NUMBER, number, line});
             continue;
         }
 
-        /** INDENTATION (4 spaces) */
+        /** INDENTATION (4 spaces = INDENT token) */
         if (c == ' ') {
             if (pos + 3 < len &&
                 source[pos+1] == ' ' &&
                 source[pos+2] == ' ' &&
-                source[pos+3] == ' ') 
+                source[pos+3] == ' ')
             {
-                tokens.push_back({TokenType::INDENT, std::nullopt, line});
+                tokens.push_back(Token{TokenType::INDENT, std::nullopt, line});
                 pos += 4;
                 continue;
             }
 
-            // Single spaces are ignored
             pos++;
             continue;
         }
 
-        /** NEWLINE **/
+        /** NEWLINES (collapse multiple into one token) */
         if (c == '\n') {
-            // 1. Consume the first newline character
             pos++;
-            line++; // The line counter MUST be incremented here
-            
-            // 2. Loop to consume all subsequent consecutive newline characters
+            line++;
+
             while (pos < len && source[pos] == '\n') {
-                pos++; 
-                line++; // Increment line counter for every consumed '\n'
+                pos++;
+                line++;
             }
-            
-            // 3. Emit only one token for the entire block of empty lines
-            tokens.push_back({TokenType::NEWLINE, std::nullopt, line});
-            
+
+            tokens.push_back(Token{TokenType::NEWLINE, std::nullopt, line});
             continue;
         }
 
         /** STRINGS */
         if (c == '"') {
-            pos++; // skip opening "
+            pos++; // skip "
             std::string value;
 
             while (pos < len) {
                 char s = source[pos];
 
-                // escape support \" and \\ 
+                // escape sequences \" and
                 if (s == '\\' && pos + 1 < len) {
                     char next = source[pos + 1];
                     if (next == '"' || next == '\\') {
@@ -108,75 +110,82 @@ std::vector<Token> Lexer::tokenize() {
                 throw std::runtime_error("Unterminated string literal");
 
             pos++; // skip closing "
-            tokens.push_back({TokenType::STRING, value, line});
+            tokens.push_back(Token{TokenType::STRING, value, line});
             continue;
         }
 
-        /** SINGLE-CHAR TOKENS */
+        /** SINGLE-CHAR + AT-KEYWORDS */
         switch (c) {
-            /** AT_KEYWORDS **/
-            case '@': {
-                ++pos;
-                if (pos >= len) break;
 
-                // Handle @identifier / @keyword
+            case '@': {
+                pos++;
+                if (pos >= len) {
+                    tokens.push_back(Token{TokenType::AT_IDENTIFIER, "", line});
+                    break;
+                }
+
                 if (std::isalpha(static_cast<unsigned char>(source[pos]))) {
                     std::string name;
-                    // FIX: Added parenthesis here as well
-                    while (pos < len && (std::isalnum(static_cast<unsigned char>(source[pos])) || source[pos] == '_')) {
+
+                    while (pos < len &&
+                           (std::isalnum(static_cast<unsigned char>(source[pos])) || source[pos] == '_'))
+                    {
                         name += source[pos++];
                     }
 
-                    // keyword or identifier?
-                    if (BUILTIN_AT_TOKENS.find(name) != BUILTIN_AT_TOKENS.end()) {
-                        tokens.push_back({BUILTIN_AT_TOKENS.at(name), name, line});
+                    auto it_at = BUILTIN_AT_TOKENS.find(name);
+                    if (it_at != BUILTIN_AT_TOKENS.end()) {
+                        tokens.push_back(Token{it_at->second, name, line});
                     } else {
-                        tokens.push_back({TokenType::AT_IDENTIFIER, name, line});
+                        tokens.push_back(Token{TokenType::AT_IDENTIFIER, name, line});
                     }
-
-                    continue;
                 }
-                continue;
+
+                break;
             }
 
             case ':':
-                tokens.push_back({TokenType::COLON, ":", line});
+                tokens.push_back(Token{TokenType::COLON, ":", line});
                 pos++;
-                continue;
+                break;
 
             case ',':
-                tokens.push_back({TokenType::COMMA, ",", line});
+                tokens.push_back(Token{TokenType::COMMA, ",", line});
                 pos++;
-                continue;
+                break;
 
             case '[':
-                tokens.push_back({TokenType::LBRACKET, "[", line});
+                tokens.push_back(Token{TokenType::LBRACKET, "[", line});
                 pos++;
-                continue;
+                break;
 
             case ']':
-                tokens.push_back({TokenType::RBRACKET, "]", line});
+                tokens.push_back(Token{TokenType::RBRACKET, "]", line});
                 pos++;
-                continue;
+                break;
 
-            // COMMENTS
-            case '#':
-                while (pos < len && source[pos] != '\n') {
-                    pos++;
-                }
-                continue;
+            case '#': {
+                // comment until newline
+                while (pos < len && source[pos] != '\n') pos++;
+                break;
+            }
 
             case '{':
             case '}':
-                pos++; // Skipping for now
-                continue;
+                pos++;
+                break;
+
+            default:
+                std::cerr << "Unknown character at line " << line
+                          << ": '" << c << "' (" << int(c) << ")" << std::endl;
+                pos++;
+                break;
         }
 
-        /** UNKNOWN CHARACTER */
-        std::cerr << "Unknown character at line " << line << ": '" << c << "' (" << (int)c << ")" << std::endl;
-        pos++;
+        // Continue outer loop after switch
+        continue;
     }
 
-    tokens.push_back({TokenType::END_OF_FILE, std::nullopt, line});
+    tokens.push_back(Token{TokenType::END_OF_FILE, std::nullopt, line});
     return tokens;
 }
