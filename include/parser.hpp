@@ -64,6 +64,12 @@ struct LoadStmtNode : ASTNode {
     // so we don't expose children() for structural AST replacement purposes.
 };
 
+struct GenericAtStmtNode : ASTNode {
+    std::string name;
+    GenericAtStmtNode(const std::string& n) : name(n) {}
+    void print(int indent = 0) const override;
+};
+
 void printPrettyTree(const RootNode* root);
 
 class Parser {
@@ -84,6 +90,7 @@ private:
     std::unique_ptr<TextStmtNode> parseTextStmt();
     std::unique_ptr<SaveStmtNode> parseSaveStmt(int currentIndent);
     std::unique_ptr<LoadStmtNode> parseLoadStmt(int currentIndent);
+    std::unique_ptr<GenericAtStmtNode> parseGenericAtStmt(int currentIndent);
 
 public:
     Parser(const std::vector<Token>& tokens);

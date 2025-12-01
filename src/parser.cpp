@@ -51,6 +51,8 @@ static void printTree(const ASTNode* node, const std::string& prefix = "", bool 
                      prefix + (isLast ? "    " : "|   "),
                      i == load->parameters.size() - 1);
         }
+    } else if (auto* generic = dynamic_cast<const GenericAtStmtNode*>(node)) {
+        std::cout << "@" << generic->name << " ARGS MISSING" << std::endl;
     }
     else if (auto* param = dynamic_cast<const ParameterNode*>(node)) {
         std::cout << param->name << ": " << param->value << std::endl;
@@ -113,6 +115,12 @@ void LoadStmtNode::print(int indent) const {
         param->print(indent + 1);
     }
 }
+
+void GenericAtStmtNode::print(int indent) const {
+    printIndent(indent);
+    std::cout << "GenericAtStmt: " << name << std::endl;
+}
+
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
 
@@ -177,6 +185,8 @@ std::unique_ptr<ASTNode> Parser::parseStatement(int currentIndent) {
             return parseSaveStmt(currentIndent);
         case TokenType::AT_LOAD:
             return parseLoadStmt(currentIndent);
+        case TokenType::AT_IDENTIFIER:
+            return parseGenericAtStmt(currentIndent);
         default:
             return nullptr;
     }
@@ -348,6 +358,16 @@ std::unique_ptr<LoadStmtNode> Parser::parseLoadStmt(int currentIndent) {
     }
 
     return component;
+}
+
+std::unique_ptr<GenericAtStmtNode> Parser::parseGenericAtStmt(int currentIndent) {
+    std::string genericName = consume().value.value(); // consume and return @<value>
+    if (peek().type != TokenType::NEWLINE)
+        throw std::runtime_error("Expected newline after generic at statement at line " + 
+                               std::to_string(peek().line));
+    consume(); // consume newline
+
+    return std::make_unique<GenericAtStmtNode>(genericName);
 }
 
 std::vector<std::unique_ptr<ParameterNode>> Parser::parseParameters(int parentIndent) {

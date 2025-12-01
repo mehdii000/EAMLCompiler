@@ -2,3 +2,4 @@
 
 @screen main:
     @text "Hello, World!"
+    @button

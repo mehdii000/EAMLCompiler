@@ -54,6 +54,12 @@ std::unique_ptr<ASTNode> CodeGenerator::cloneNode(const ASTNode* node) {
         return out;
     }
 
+    // GenericAt
+    if (auto* g = dynamic_cast<const GenericAtStmtNode*>(node)) {
+        return std::make_unique<GenericAtStmtNode>(g->name);
+    }
+
+
     throw std::runtime_error("Unknown AST node type in cloneNode()");
 }
 
@@ -167,7 +173,16 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
                 }
             }
             out << "<div>" << txt << "</div>\n";
-        } 
+        }
+        else if (auto* generic = dynamic_cast<const GenericAtStmtNode*>(node)) {
+            std::string html_header = generic->name;
+            for (auto& [k, v] : context) {
+                html_header += " " + k + "=\"" + v + "\"";
+            }
+            out << "<" << html_header << ">\n";
+            out << "Test";
+            out << "</" << html_header << ">\n";
+        }
         else if (auto* screen = dynamic_cast<const ScreenStmtNode*>(node)) {
             out << "<div class=\"screen\" id=\"" << screen->name << "\">\n";
             for (auto& stmt : screen->body)

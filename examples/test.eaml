@@ -9,9 +9,8 @@
     @load buttons
 
 @save buttons:
-    @text "imagine a button"
-    @text "imagine a button"
-    @text "imagine a button"
+    @text "imagine a button 1"
+    @text "imagine a button 2"
 
 # A screen is a <div> that automatically resizes and adapts to other screens
 # unless another screen is marked with a [hidden] modifier
