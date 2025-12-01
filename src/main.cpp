@@ -43,13 +43,15 @@ int main(int argc, char const *argv[])
     std::string source = readFile(argv[1]);
 
     // Lexing
+    std::cout << "=========================" << std::endl;
     std::cout << "Tokenizing..." << std::endl;
 
     std::vector<Token> tokens;
     Lexer lexer(source);
     tokens = lexer.tokenize();
 
-    /*for (const Token& token : tokens) {
+    /*
+    for (const Token& token : tokens) {
         std::string token_type_str = getType(token.type);
         
         if (token_type_str == "NEWLINE") {
@@ -64,10 +66,12 @@ int main(int argc, char const *argv[])
             std::cout << token_type_str << " ";
         }
     }
+    */
 
-    std::cout << std::endl;*/
+    std::cout << std::endl;
 
     Parser parser(tokens);
+    std::cout << "=========================" << std::endl;
     std::cout << "Parsing..." << std::endl;
 
     // Begin Parsing
@@ -79,12 +83,13 @@ int main(int argc, char const *argv[])
         Now this essentially just returns the tree
     */
     ast = analyzeTree(std::move(ast));
+    std::cout << "=========HTML============" << std::endl;
 
     CodeGenerator codegen;
     codegen.generate(*ast);
+    std::cout << "=========================" << std::endl;
 
-    
-
-    //printPrettyTree(ast.get());
+    if (argc > 2 && std::string(argv[2]) == "-tree")
+        printPrettyTree(ast.get());
     return 0;
 }

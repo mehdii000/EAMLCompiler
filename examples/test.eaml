@@ -1,6 +1,9 @@
 @title "My App"
 
-@save card:
+# this a comment
+# the lexer ignores comments
+
+@save card: # this is a card
     @text "hey {name}"
     @text "refrence"
     @load buttons
@@ -10,6 +13,8 @@
     @text "imagine a button"
     @text "imagine a button"
 
+# A screen is a <div> that automatically resizes and adapts to other screens
+# unless another screen is marked with a [hidden] modifier
 @screen main:
     @load card with:
         name: "hey"
