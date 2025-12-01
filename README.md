@@ -1,4 +1,4 @@
-# EAML - Extremely Accessible Markup Language
+# EAML - Eaml's Average Markdown Language
 
 > A human-readable markup language that compiles to HTML/CSS, designed for teaching web design to beginners.
 
