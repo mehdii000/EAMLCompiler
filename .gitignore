@@ -33,6 +33,7 @@ lib/
 *.dylib
 *.a
 *.lib
+eaml
 
 # Testing
 Testing/
