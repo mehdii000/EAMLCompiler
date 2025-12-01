@@ -15,47 +15,52 @@ EAML makes web design accessible. Write less verbose, resuable, readable code an
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>My App</title>
+<meta charset="UTF-8">
+<title>Simple Title</title>
 </head>
 <body>
-
-<!-- main screen -->
-<div class="main-screen">
-    <div class="card">
-        <div>hey Mehdi</div>
-        <div class="buttons">
-            <button class="button">Click 1</div>
-            <button class="button">Click 2</div>
-            <button class="button">Click 3</div>
-        </div>
+    <div class="screen" id="main">
+        <h1>Hey there!</h1>
+        <button>click me</button>
+        <br></br>
+        <div>hey i am Alice</div>
+        <div>i am 12 old</div>
+        <br></br>
+        <div>hey i am Mehdi</div>
+        <div>i am 13 old</div>
+        <br></br>
+        <div>hey i am Eve</div>
+        <div>i am 16 old</div>
+        <br></br>
     </div>
-
-    <p>Hello</p>
-</div>
-
 </body>
 </html>
-
 ```
 
 **After (EAML):**
 ```eaml
-@title "My App"
+@title "Simple Title"
 
 @save card:
-    @text "hey {name}"
-    @load buttons
-
-@save buttons:
-    @button "Click 1"
-    @button "Click 2"
-    @button "Click 3"
+    @text "hey i am {name}"
+    @text "i am {age} old"
+    @br
 
 @screen main:
+    @h1 "Hey there!"
+    @button "click me"
+
+    @br
+
     @load card with:
-        name: "hey"
-    @text "Mehdi"
+        name: "Alice"
+        age: 12
+    @load card with:
+        name: "Mehdi"
+        age: 13
+    @load card with:
+        name: "Eve"
+        age: 16
 ```
 
 ---

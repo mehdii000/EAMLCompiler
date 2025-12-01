@@ -8,7 +8,9 @@
 @screen main:
     @h1 "Hey there!"
     @button "click me"
+
     @br
+
     @load card with:
         name: "Alice"
         age: 12
