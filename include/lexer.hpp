@@ -11,6 +11,7 @@ enum class TokenType {
     AT_SAVE,
     AT_SCREEN,
     AT_LOAD,
+    WITH,
     AT_ROW,
     AT_STACK,
     AT_TEXT,
@@ -49,7 +50,7 @@ private:
     size_t line = 1;
 };
 
-static const std::unordered_map<std::string, TokenType> BUILTIN_TOKENS = {
+static const std::unordered_map<std::string, TokenType> BUILTIN_AT_TOKENS = {
     {"title", TokenType::AT_TITLE},
     {"const", TokenType::AT_CONSTANT},
     {"save", TokenType::AT_SAVE},
@@ -58,4 +59,8 @@ static const std::unordered_map<std::string, TokenType> BUILTIN_TOKENS = {
     {"row", TokenType::AT_ROW},
     {"stack", TokenType::AT_STACK},
     {"text", TokenType::AT_TEXT}
+};
+
+static const std::unordered_map<std::string, TokenType> BUILTIN_TOKENS = {
+    {"with", TokenType::WITH}
 };

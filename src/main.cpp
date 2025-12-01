@@ -4,6 +4,7 @@
 #include "codeutils.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
+#include "anaylzer.hpp"
 
 std::string getType(TokenType type) {
     switch (type) {
@@ -51,13 +52,12 @@ int main(int argc, char const *argv[])
         std::string token_type_str = getType(token.type);
         
         if (token_type_str == "NEWLINE") {
-            std::cout << "\n";
+            std::cout << " #\n";
         } 
         else if (token_type_str == "INDENT") {
             std::cout << "-> ";
         }
         else if (token.value.has_value()) {
-            // For all other tokens (IDENTIFIER, STRING, etc.)
             std::cout << token.value.value() << " ";
         } else {
             std::cout << token_type_str << " ";
@@ -66,17 +66,16 @@ int main(int argc, char const *argv[])
 
     std::cout << std::endl;
 
-    /* Parsing
-    std::cout << "Parsing..." << std::endl << "---------------------------------------------" << std::endl;
-    try {
-        Parser parser(tokens);
-        auto ast = parser.parse();
-        ast->print(0);
-    } catch (const std::exception& e) {
-        std::cerr << "Parse error: " << e.what() << std::endl;
-        return 1;
-    }
+    Parser parser(tokens);
+    std::cout << "Parsing..." << std::endl;
+    auto ast = parser.parseProgram();
+    
+    /*
+        TODO: Implement this analyzing logic.
+        Now this essentially just returns the tree
     */
+    ast = analyzeTree(std::move(ast));
 
+    printPrettyTree(ast.get());
     return 0;
 }

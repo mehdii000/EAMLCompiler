@@ -25,6 +25,12 @@ std::vector<Token> Lexer::tokenize() {
             while (pos < len && (std::isalnum(static_cast<unsigned char>(source[pos])) || source[pos] == '_')) {
                 id += source[pos++];
             }
+
+            if (BUILTIN_TOKENS.find(id) != BUILTIN_TOKENS.end()) {
+                tokens.push_back({BUILTIN_TOKENS.at(id), id, line});
+                continue;
+            }
+
             tokens.push_back({TokenType::IDENTIFIER, id, line});
             continue;
         }
@@ -122,8 +128,8 @@ std::vector<Token> Lexer::tokenize() {
                     }
 
                     // keyword or identifier?
-                    if (BUILTIN_TOKENS.find(name) != BUILTIN_TOKENS.end()) {
-                        tokens.push_back({BUILTIN_TOKENS.at(name), name, line});
+                    if (BUILTIN_AT_TOKENS.find(name) != BUILTIN_AT_TOKENS.end()) {
+                        tokens.push_back({BUILTIN_AT_TOKENS.at(name), name, line});
                     } else {
                         tokens.push_back({TokenType::AT_IDENTIFIER, name, line});
                     }

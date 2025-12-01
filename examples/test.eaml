@@ -1,16 +1,9 @@
-@title "hey"
+@title "My App"
 
-# this is a comment
-
-
-
+@save card:
+    @text "hey {name}"
 
 @screen main:
-    @button "hey"
-    @text "this is some text"
-
-    @row:
-        @text "hello"
-        @button "hei"
-
-    @text "hello"
+    @text "Hello"
+    @load card with:
+        name: "Hello There"

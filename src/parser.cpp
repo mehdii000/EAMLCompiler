@@ -2,15 +2,72 @@
 #include <iostream>
 #include <stdexcept>
 
-// Helper function to print indentation
 static void printIndent(int indent) {
     for (int i = 0; i < indent; i++) {
         std::cout << "  ";
     }
 }
 
-// Print implementations
-void ProgramNode::print(int indent) const {
+static void printTree(const ASTNode* node, const std::string& prefix = "", bool isLast = true) {
+    if (!node) return;
+    
+    std::cout << prefix;
+    std::cout << (isLast ? "`--> " : "|-> ");
+    
+    if (auto* root = dynamic_cast<const RootNode*>(node)) {
+        std::cout << "[Program]" << std::endl;
+        for (size_t i = 0; i < root->statements.size(); i++) {
+            printTree(root->statements[i].get(), 
+                     prefix + (isLast ? "    " : "|   "),
+                     i == root->statements.size() - 1);
+        }
+    }
+    else if (auto* title = dynamic_cast<const TitleStmtNode*>(node)) {
+        std::cout << "@title \"" << title->title << "\"" << std::endl;
+    }
+    else if (auto* screen = dynamic_cast<const ScreenStmtNode*>(node)) {
+        std::cout << "@screen " << screen->name << std::endl;
+        for (size_t i = 0; i < screen->body.size(); i++) {
+            printTree(screen->body[i].get(),
+                     prefix + (isLast ? "    " : "|   "),
+                     i == screen->body.size() - 1);
+        }
+    }
+    else if (auto* text = dynamic_cast<const TextStmtNode*>(node)) {
+        std::cout << "@text \"" << text->text << "\"" << std::endl;
+    }
+    else if (auto* save = dynamic_cast<const SaveStmtNode*>(node)) {
+        std::cout << "@save " << save->name << std::endl;
+        for (size_t i = 0; i < save->body.size(); i++) {
+            printTree(save->body[i].get(),
+                     prefix + (isLast ? "    " : "|   "),
+                     i == save->body.size() - 1);
+        }
+    }
+    else if (auto* load = dynamic_cast<const LoadStmtNode*>(node)) {
+        std::cout << "@load " << load->name << std::endl;
+        for (size_t i = 0; i < load->parameters.size(); i++) {
+            printTree(load->parameters[i].get(),
+                     prefix + (isLast ? "    " : "|   "),
+                     i == load->parameters.size() - 1);
+        }
+    }
+    else if (auto* param = dynamic_cast<const ParameterNode*>(node)) {
+        std::cout << param->name << ": " << param->value << std::endl;
+    }
+}
+
+void printPrettyTree(const RootNode* root) {
+    std::cout << "\n";
+    std::cout << "========================================" << std::endl;
+    std::cout << "          AST Tree View" << std::endl;
+    std::cout << "========================================" << std::endl;
+    std::cout << "\n";
+    printTree(root, "", true);
+    std::cout << "\n";
+}
+
+void RootNode::print(int indent) const {
     printIndent(indent);
     std::cout << "Program" << std::endl;
     for (const auto& stmt : statements) {
@@ -21,14 +78,6 @@ void ProgramNode::print(int indent) const {
 void TitleStmtNode::print(int indent) const {
     printIndent(indent);
     std::cout << "TitleStmt: \"" << title << "\"" << std::endl;
-}
-
-void SaveStmtNode::print(int indent) const {
-    printIndent(indent);
-    std::cout << "SaveStmt: " << name << std::endl;
-    for (const auto& stmt : body) {
-        stmt->print(indent + 1);
-    }
 }
 
 void ScreenStmtNode::print(int indent) const {
@@ -44,86 +93,56 @@ void TextStmtNode::print(int indent) const {
     std::cout << "TextStmt: \"" << text << "\"" << std::endl;
 }
 
-void ButtonStmtNode::print(int indent) const {
+void ParameterNode::print(int indent) const {
     printIndent(indent);
-    std::cout << "ButtonStmt: \"" << label << "\"" << std::endl;
+    std::cout << "Parameter: " << name << " = " << value << std::endl;
 }
 
-void RowStmtNode::print(int indent) const {
+void SaveStmtNode::print(int indent) const {
     printIndent(indent);
-    std::cout << "RowStmt" << std::endl;
+    std::cout << "SaveStmt: " << name << std::endl;
     for (const auto& stmt : body) {
         stmt->print(indent + 1);
     }
 }
 
-void ParamAssignmentNode::print(int indent) const {
-    printIndent(indent);
-    std::cout << "Param: " << name << " = \"" << value << "\"" << std::endl;
-}
-
 void LoadStmtNode::print(int indent) const {
     printIndent(indent);
-    std::cout << "LoadStmt: " << componentName;
-    if (hasAlias) {
-        std::cout << " (alias: " << alias << ")";
-    }
-    std::cout << std::endl;
-    for (const auto& param : params) {
+    std::cout << "LoadStmt: " << name << std::endl;
+    for (const auto& param : parameters) {
         param->print(indent + 1);
     }
 }
 
-// Parser implementation
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
 
-Token Parser::peek() const {
-    if (pos < tokens.size()) {
-        return tokens[pos];
+Token Parser::peek(int offset) const {
+    if (pos + offset < tokens.size()) {
+        return tokens[pos + offset];
     }
-    return tokens.back(); // Return END_OF_FILE
+    return tokens.back();
 }
 
-Token Parser::advance() {
+Token Parser::consume() {
     if (pos < tokens.size()) {
         return tokens[pos++];
     }
     return tokens.back();
 }
 
-bool Parser::match(TokenType type) {
-    if (peek().type == type) {
-        advance();
-        return true;
-    }
-    return false;
-}
-
-Token Parser::expect(TokenType type, const std::string& message) {
-    Token tok = peek();
-    if (tok.type != type) {
-        throw std::runtime_error("Parse error Multi-step fluid processing at line " + std::to_string(tok.line) + ": " + message);
-    }
-    return advance();
-}
-
 void Parser::skipNewlines() {
-    while (match(TokenType::NEWLINE)) {}
+    while (peek().type == TokenType::NEWLINE) {
+        consume();
+    }
 }
 
-std::unique_ptr<ProgramNode> Parser::parse() {
-    return parseProgram();
-}
-
-std::unique_ptr<ProgramNode> Parser::parseProgram() {
-    auto program = std::make_unique<ProgramNode>();
+std::unique_ptr<RootNode> Parser::parseProgram() {
+    auto program = std::make_unique<RootNode>();
     
-    // Skip leading newlines
     skipNewlines();
     
-    // Parse top-level statements
     while (peek().type != TokenType::END_OF_FILE) {
-        auto stmt = parseTopLevelStmt();
+        auto stmt = parseStatement(0);
         if (stmt) {
             program->statements.push_back(std::move(stmt));
         }
@@ -133,165 +152,247 @@ std::unique_ptr<ProgramNode> Parser::parseProgram() {
     return program;
 }
 
-std::unique_ptr<ASTNode> Parser::parseTopLevelStmt() {
-    Token tok = peek();
+std::unique_ptr<ASTNode> Parser::parseStatement(int currentIndent) {
+    int indent = 0;
+    while (peek(indent).type == TokenType::INDENT) {
+        indent++;
+    }
     
-    switch (tok.type) {
+    if (indent != currentIndent) {
+        return nullptr;
+    }
+    
+    for (int i = 0; i < indent; i++) {
+        consume();
+    }
+    
+    switch (peek().type) {
         case TokenType::AT_TITLE:
             return parseTitleStmt();
-        case TokenType::AT_SAVE:
-            return parseSaveStmt();
         case TokenType::AT_SCREEN:
-            return parseScreenStmt();
+            return parseScreenStmt(currentIndent);
+        case TokenType::AT_TEXT:
+            return parseTextStmt();
+        case TokenType::AT_SAVE:
+            return parseSaveStmt(currentIndent);
+        case TokenType::AT_LOAD:
+            return parseLoadStmt(currentIndent);
         default:
-            throw std::runtime_error("Unexpected token at line " + std::to_string(tok.line));
+            return nullptr;
     }
 }
 
-std::unique_ptr<TitleStmtNode> Parser::parseTitleStmt() {
-    size_t line = peek().line;
-    expect(TokenType::AT_TITLE, "Expected @title");
-    Token str = expect(TokenType::STRING, "Expected string after @title");
-    expect(TokenType::NEWLINE, "Expected newline after title string");
-    
-    return std::make_unique<TitleStmtNode>(str.value.value(), line);
-}
-
-std::unique_ptr<SaveStmtNode> Parser::parseSaveStmt() {
-    size_t line = peek().line;
-    expect(TokenType::AT_SAVE, "Expected @save");
-    Token id = expect(TokenType::IDENTIFIER, "Expected identifier after @save");
-    expect(TokenType::COLON, "Expected ':' after save identifier");
-    expect(TokenType::NEWLINE, "Expected newline after ':'");
-    
-    auto saveNode = std::make_unique<SaveStmtNode>(id.value.value(), line);
-    saveNode->body = parseBlock();
-    
-    return saveNode;
-}
-
-std::unique_ptr<ScreenStmtNode> Parser::parseScreenStmt() {
-    size_t line = peek().line;
-    expect(TokenType::AT_SCREEN, "Expected @screen");
-    Token id = expect(TokenType::IDENTIFIER, "Expected identifier after @screen");
-    expect(TokenType::COLON, "Expected ':' after screen identifier");
-    expect(TokenType::NEWLINE, "Expected newline after ':'");
-    
-    auto screenNode = std::make_unique<ScreenStmtNode>(id.value.value(), line);
-    screenNode->body = parseBlock();
-    
-    return screenNode;
-}
-
-std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock() {
+std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock(int parentIndent) {
     std::vector<std::unique_ptr<ASTNode>> statements;
+    int blockIndent = parentIndent + 1;
     
-    while (peek().type == TokenType::INDENT) {
-        advance(); // consume INDENT
-        auto stmt = parseBlockStmt();
+    skipNewlines();
+    
+    while (peek().type != TokenType::END_OF_FILE) {
+        int indent = 0;
+        int offset = 0;
+        while (peek(offset).type == TokenType::INDENT) {
+            indent++;
+            offset++;
+        }
+        
+        if (indent < blockIndent) {
+            break;
+        }
+        
+        if (indent > blockIndent) {
+            throw std::runtime_error("Unexpected indentation at line " + 
+                                   std::to_string(peek().line));
+        }
+        
+        auto stmt = parseStatement(blockIndent);
         if (stmt) {
             statements.push_back(std::move(stmt));
+        } else {
+            break;
         }
+        
+        skipNewlines();
     }
     
     return statements;
 }
 
-std::unique_ptr<ASTNode> Parser::parseBlockStmt() {
-    Token tok = peek();
+std::unique_ptr<TitleStmtNode> Parser::parseTitleStmt() {
+    consume();
     
-    switch (tok.type) {
-        case TokenType::AT_TEXT:
-            return parseTextStmt();
-        case TokenType::AT_IDENTIFIER:
-            return parseButtonStmt();
-        case TokenType::AT_ROW:
-            return parseRowStmt();
-        case TokenType::AT_LOAD:
-            return parseLoadStmt();
-        case TokenType::NEWLINE:
-            advance();
-            return nullptr;
-        default:
-            throw std::runtime_error("Unexpected token in block at line " + std::to_string(tok.line));
+    if (peek().type != TokenType::STRING) {
+        throw std::runtime_error("Expected string after @title at line " + 
+                               std::to_string(peek().line));
     }
+    
+    std::string title = consume().value.value();
+    
+    if (peek().type != TokenType::NEWLINE) {
+        throw std::runtime_error("Expected newline after title at line " + 
+                               std::to_string(peek().line));
+    }
+    
+    return std::make_unique<TitleStmtNode>(title);
+}
+
+std::unique_ptr<ScreenStmtNode> Parser::parseScreenStmt(int currentIndent) {
+    consume();
+    
+    if (peek().type != TokenType::IDENTIFIER) {
+        throw std::runtime_error("Expected identifier after @screen at line " + 
+                               std::to_string(peek().line));
+    }
+    
+    std::string screenName = consume().value.value();
+    auto screen = std::make_unique<ScreenStmtNode>(screenName);
+
+    if (peek().type != TokenType::COLON) {
+        throw std::runtime_error("Expected colon after screen name at line " + 
+                               std::to_string(peek().line));
+    }
+    consume();
+    
+    if (peek().type != TokenType::NEWLINE) {
+        throw std::runtime_error("Expected newline after colon at line " + 
+                               std::to_string(peek().line));
+    }
+    
+    screen->body = parseBlock(currentIndent);
+    
+    return screen;
 }
 
 std::unique_ptr<TextStmtNode> Parser::parseTextStmt() {
-    size_t line = peek().line;
-    expect(TokenType::AT_TEXT, "Expected @text");
-    Token str = expect(TokenType::STRING, "Expected string after @text");
-    expect(TokenType::NEWLINE, "Expected newline after text string");
+    consume();
     
-    return std::make_unique<TextStmtNode>(str.value.value(), line);
-}
-
-std::unique_ptr<ButtonStmtNode> Parser::parseButtonStmt() {
-    size_t line = peek().line;
-    expect(TokenType::AT_IDENTIFIER, "Expected @identifier");
-    Token str = expect(TokenType::STRING, "Expected string after @identifier");
-    expect(TokenType::NEWLINE, "Expected newline after button string");
-    
-    return std::make_unique<ButtonStmtNode>(str.value.value(), line);
-}
-
-std::unique_ptr<RowStmtNode> Parser::parseRowStmt() {
-    size_t line = peek().line;
-    expect(TokenType::AT_ROW, "Expected @row");
-    expect(TokenType::COLON, "Expected ':' after @row");
-    expect(TokenType::NEWLINE, "Expected newline after ':'");
-    
-    auto rowNode = std::make_unique<RowStmtNode>(line);
-    rowNode->body = parseBlock();
-    
-    return rowNode;
-}
-
-std::unique_ptr<LoadStmtNode> Parser::parseLoadStmt() {
-    size_t line = peek().line;
-    expect(TokenType::AT_LOAD, "Expected @load");
-    Token component = expect(TokenType::IDENTIFIER, "Expected component name after @load");
-    
-    auto loadNode = std::make_unique<LoadStmtNode>(component.value.value(), line);
-    
-    // Check for optional alias (IDENTIFIER)
-    if (peek().type == TokenType::IDENTIFIER) {
-        Token aliasToken = advance();
-        loadNode->alias = aliasToken.value.value();
-        loadNode->hasAlias = true;
-        
-        // The alias should be "with", but we store it anyway
-        // You can add validation here if needed
+    if (peek().type != TokenType::STRING) {
+        throw std::runtime_error("Expected string after @text at line " + 
+                               std::to_string(peek().line));
     }
     
-    expect(TokenType::COLON, "Expected ':' after @load");
-    expect(TokenType::NEWLINE, "Expected newline after ':'");
+    std::string text = consume().value.value();
     
-    loadNode->params = parseLoadParamBlock();
+    if (peek().type != TokenType::NEWLINE) {
+        throw std::runtime_error("Expected newline after text string at line " + 
+                               std::to_string(peek().line));
+    }
     
-    return loadNode;
+    return std::make_unique<TextStmtNode>(text);
 }
 
-std::vector<std::unique_ptr<ASTNode>> Parser::parseLoadParamBlock() {
-    std::vector<std::unique_ptr<ASTNode>> params;
+std::unique_ptr<SaveStmtNode> Parser::parseSaveStmt(int currentIndent) {
+    consume();
     
-    while (peek().type == TokenType::INDENT) {
-        advance(); // consume INDENT
-        auto param = parseParamAssignment();
-        if (param) {
-            params.push_back(std::move(param));
+    if (peek().type != TokenType::IDENTIFIER) {
+        throw std::runtime_error("Expected identifier after @save at line " + 
+                               std::to_string(peek().line));
+    }
+    
+    std::string componentName = consume().value.value();
+    auto component = std::make_unique<SaveStmtNode>(componentName);
+
+    if (peek().type != TokenType::COLON) {
+        throw std::runtime_error("Expected colon after component name at line " + 
+                               std::to_string(peek().line));
+    }
+    consume();
+    
+    if (peek().type != TokenType::NEWLINE) {
+        throw std::runtime_error("Expected newline after colon at line " + 
+                               std::to_string(peek().line));
+    }
+    
+    component->body = parseBlock(currentIndent);
+    
+    return component;
+}
+
+std::unique_ptr<LoadStmtNode> Parser::parseLoadStmt(int currentIndent) {
+    consume();
+    
+    if (peek().type != TokenType::IDENTIFIER) {
+        throw std::runtime_error("Expected identifier after @load at line " + 
+                               std::to_string(peek().line));
+    }
+    
+    std::string componentName = consume().value.value();
+    auto component = std::make_unique<LoadStmtNode>(componentName);
+
+    if (peek().type == TokenType::WITH) {
+        consume();
+
+        if (peek().type != TokenType::COLON) {
+            throw std::runtime_error("Expected colon after 'with' at line " + 
+                                   std::to_string(peek().line));
         }
+        consume();
+        
+        if (peek().type != TokenType::NEWLINE) {
+            throw std::runtime_error("Expected newline after colon at line " + 
+                                   std::to_string(peek().line));
+        }
+
+        component->parameters = std::move(parseParameters(currentIndent));
     }
     
-    return params;
+    if (peek().type != TokenType::NEWLINE && peek().type != TokenType::END_OF_FILE) {
+        throw std::runtime_error("Expected newline after component name at line " + 
+                               std::to_string(peek().line));
+    }
+    
+    return component;
 }
 
-std::unique_ptr<ParamAssignmentNode> Parser::parseParamAssignment() {
-    size_t line = peek().line;
-    Token name = expect(TokenType::IDENTIFIER, "Expected parameter name");
-    expect(TokenType::COLON, "Expected ':' after parameter name");
-    Token value = expect(TokenType::STRING, "Expected string value for parameter");
-    expect(TokenType::NEWLINE, "Expected newline after parameter value");
+std::vector<std::unique_ptr<ParameterNode>> Parser::parseParameters(int parentIndent) {
+    std::vector<std::unique_ptr<ParameterNode>> parameters;
+    int blockIndent = parentIndent + 1;
     
-    return std::make_unique<ParamAssignmentNode>(name.value.value(), value.value.value(), line);
+    skipNewlines();
+    
+    while (peek().type != TokenType::END_OF_FILE) {
+        int indent = 0;
+        int offset = 0;
+        while (peek(offset).type == TokenType::INDENT) {
+            indent++;
+            offset++;
+        }
+        
+        if (indent < blockIndent) {
+            break;
+        }
+        
+        if (indent > blockIndent) {
+            throw std::runtime_error("Unexpected indentation at line " + 
+                                   std::to_string(peek().line));
+        }
+        
+        for (int i = 0; i < indent; i++) {
+            consume();
+        }
+        
+        if (peek().type != TokenType::IDENTIFIER) {
+            break;
+        }
+        
+        std::string paramName = consume().value.value();
+        
+        if (peek().type != TokenType::COLON) {
+            throw std::runtime_error("Expected colon after parameter name at line " + 
+                                   std::to_string(peek().line));
+        }
+        consume();
+        
+        if (peek().type != TokenType::STRING && peek().type != TokenType::IDENTIFIER) {
+            throw std::runtime_error("Expected value after colon at line " + 
+                                   std::to_string(peek().line));
+        }
+        
+        std::string paramValue = consume().value.value();
+        parameters.push_back(std::make_unique<ParameterNode>(paramName, paramValue));
+        
+        skipNewlines();
+    }
+    
+    return parameters;
 }
