@@ -2,29 +2,60 @@
 
 > A human-readable markup language that compiles to HTML/CSS, designed for teaching web design to beginners.
 
-[![C++17](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/17)
+[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 
 ---
 
 ## 🎯 What is EAML?
 
-EAML makes web design accessible to everyone. Write simple, readable code and get beautiful HTML/CSS pages instantly.
+EAML makes web design accessible. Less Verbose, Write simple, readable code and get subjectvly beautiful HTML/CSS pages.
 
 **Before (HTML):**
 ```html
-<div class="card" style="border: 1px solid #ccc; padding: 20px;">
-    <h2>Hello World</h2>
-    <p>Welcome to my website!</p>
-    <button>Click Me</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My App</title>
+</head>
+<body>
+
+<!-- main screen -->
+<div class="main-screen">
+    <div class="card">
+        <div>hey Mehdi</div>
+        <div class="buttons">
+            <button class="button">Click 1</div>
+            <button class="button">Click 2</div>
+            <button class="button">Click 3</div>
+        </div>
+    </div>
+
+    <p>Hello</p>
 </div>
+
+</body>
+</html>
+
 ```
 
 **After (EAML):**
 ```eaml
-@define card [bordered]:
-    @heading "Hello World"
-    @text "Welcome to my website!"
-    @button "Click Me"
+@title "My App"
+
+@save card:
+    @text "hey {name}"
+    @load buttons
+
+@save buttons:
+    @button "Click 1"
+    @button "Click 2"
+    @button "Click 3"
+
+@screen main:
+    @load card with:
+        name: "hey"
+    @text "Mehdi"
 ```
 
 ---

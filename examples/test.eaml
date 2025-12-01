@@ -3,6 +3,12 @@
 @save card:
     @text "hey {name}"
     @text "refrence"
+    @load buttons
+
+@save buttons:
+    @text "imagine a button"
+    @text "imagine a button"
+    @text "imagine a button"
 
 @screen main:
     @load card with:
