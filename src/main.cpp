@@ -83,6 +83,8 @@ int main(int argc, char const *argv[])
     CodeGenerator codegen;
     codegen.generate(*ast);
 
-    printPrettyTree(ast.get());
+    
+
+    //printPrettyTree(ast.get());
     return 0;
 }

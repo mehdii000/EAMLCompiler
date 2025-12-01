@@ -1,0 +1,4 @@
+@title "Simple Title"
+
+@screen main:
+    @text "Hello, World!"

@@ -1,6 +1,8 @@
 #include "codegen.hpp"
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
+#include <functional>
 
 // -------------------------------
 // Deep Clone Support
@@ -117,4 +119,76 @@ void CodeGenerator::generate(RootNode& root) {
 
     // 2. Expand @load across *all* root statements
     expandLoadsInList(root.statements);
+
+    std::cout << generateHTMLOutput(root) << std::endl;
+
+}
+
+std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
+    std::ostringstream out;
+
+    // Start HTML
+    out << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<title>";
+
+    // Find title node
+    for (auto& stmt : root.statements) {
+        if (auto* title = dynamic_cast<TitleStmtNode*>(stmt.get())) {
+            out << title->title;
+            break;
+        }
+    }
+
+    out << "</title>\n</head>\n<body>\n";
+
+    // Recursive helper lambda
+    std::function<void(const ASTNode*, const std::unordered_map<std::string, std::string>&)> renderNode;
+    renderNode = [&](const ASTNode* node, const std::unordered_map<std::string, std::string>& context) {
+        if (!node) return;
+
+        if (auto* text = dynamic_cast<const TextStmtNode*>(node)) {
+            std::string txt = text->text;
+            // Replace placeholders like {name} with context values
+            for (auto& [k, v] : context) {
+                size_t pos = 0;
+                std::string ph = "{" + k + "}";
+                while ((pos = txt.find(ph, pos)) != std::string::npos) {
+                    txt.replace(pos, ph.length(), v);
+                    pos += v.length();
+                }
+            }
+            out << "<div>" << txt << "</div>\n";
+        } 
+        else if (auto* screen = dynamic_cast<const ScreenStmtNode*>(node)) {
+            out << "<div class=\"screen\" id=\"" << screen->name << "\">\n";
+            for (auto& stmt : screen->body)
+                renderNode(stmt.get(), context);
+            out << "</div>\n";
+        } 
+        else if (auto* load = dynamic_cast<const LoadStmtNode*>(node)) {
+            // Build context from parameters
+            std::unordered_map<std::string, std::string> paramContext;
+            for (auto& p : load->parameters)
+                paramContext[p->name] = p->value;
+
+            // Lookup saved nodes
+            auto it = atSaveTable.find(load->name);
+            if (it != atSaveTable.end()) {
+                for (auto& saved : it->second)
+                    renderNode(saved.get(), paramContext);
+            }
+        } 
+        else if (auto* save = dynamic_cast<const SaveStmtNode*>(node)) {
+            // Usually saves are templates; don't render directly
+        }
+    };
+
+    // Render all root statements except @save and @title
+    for (auto& stmt : root.statements) {
+        if (!dynamic_cast<SaveStmtNode*>(stmt.get()) && !dynamic_cast<TitleStmtNode*>(stmt.get()))
+            renderNode(stmt.get(), {});
+    }
+
+    out << "</body>\n</html>\n";
+
+    return out.str();
 }

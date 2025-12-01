@@ -10,6 +10,8 @@ private:
 
     std::unique_ptr<ASTNode> cloneNode(const ASTNode* node);
     void expandLoadsInList(std::vector<std::unique_ptr<ASTNode>>& list);
+    std::string generateHTMLOutput(RootNode& root);
+
 
 public:
     void generate(RootNode& root);
