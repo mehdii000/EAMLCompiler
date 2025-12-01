@@ -68,6 +68,9 @@ int main(int argc, char const *argv[])
 
     Parser parser(tokens);
     std::cout << "Parsing..." << std::endl;
+
+    // Begin Parsing
+
     auto ast = parser.parseProgram();
     
     /*
