@@ -5,6 +5,7 @@
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "anaylzer.hpp"
+#include "codegen.hpp"
 
 std::string getType(TokenType type) {
     switch (type) {
@@ -48,7 +49,7 @@ int main(int argc, char const *argv[])
     Lexer lexer(source);
     tokens = lexer.tokenize();
 
-    for (const Token& token : tokens) {
+    /*for (const Token& token : tokens) {
         std::string token_type_str = getType(token.type);
         
         if (token_type_str == "NEWLINE") {
@@ -64,7 +65,7 @@ int main(int argc, char const *argv[])
         }
     }
 
-    std::cout << std::endl;
+    std::cout << std::endl;*/
 
     Parser parser(tokens);
     std::cout << "Parsing..." << std::endl;
@@ -78,6 +79,9 @@ int main(int argc, char const *argv[])
         Now this essentially just returns the tree
     */
     ast = analyzeTree(std::move(ast));
+
+    CodeGenerator codegen;
+    codegen.generate(*ast);
 
     printPrettyTree(ast.get());
     return 0;

@@ -2,8 +2,9 @@
 
 @save card:
     @text "hey {name}"
+    @text "refrence"
 
 @screen main:
-    @text "Hello"
     @load card with:
-        name: "Hello There"
+        name: "hey"
+    @text "Hello"

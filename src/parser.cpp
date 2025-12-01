@@ -219,7 +219,7 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock(int parentIndent) {
 }
 
 std::unique_ptr<TitleStmtNode> Parser::parseTitleStmt() {
-    consume();
+    consume(); // consume @title
     
     if (peek().type != TokenType::STRING) {
         throw std::runtime_error("Expected string after @title at line " + 
@@ -232,12 +232,13 @@ std::unique_ptr<TitleStmtNode> Parser::parseTitleStmt() {
         throw std::runtime_error("Expected newline after title at line " + 
                                std::to_string(peek().line));
     }
+    consume(); // consume newline
     
     return std::make_unique<TitleStmtNode>(title);
 }
 
 std::unique_ptr<ScreenStmtNode> Parser::parseScreenStmt(int currentIndent) {
-    consume();
+    consume(); // consume @screen
     
     if (peek().type != TokenType::IDENTIFIER) {
         throw std::runtime_error("Expected identifier after @screen at line " + 
@@ -251,12 +252,13 @@ std::unique_ptr<ScreenStmtNode> Parser::parseScreenStmt(int currentIndent) {
         throw std::runtime_error("Expected colon after screen name at line " + 
                                std::to_string(peek().line));
     }
-    consume();
+    consume(); // consume colon
     
     if (peek().type != TokenType::NEWLINE) {
         throw std::runtime_error("Expected newline after colon at line " + 
                                std::to_string(peek().line));
     }
+    consume(); // consume newline before parsing block
     
     screen->body = parseBlock(currentIndent);
     
@@ -264,7 +266,7 @@ std::unique_ptr<ScreenStmtNode> Parser::parseScreenStmt(int currentIndent) {
 }
 
 std::unique_ptr<TextStmtNode> Parser::parseTextStmt() {
-    consume();
+    consume(); // consume @text
     
     if (peek().type != TokenType::STRING) {
         throw std::runtime_error("Expected string after @text at line " + 
@@ -277,12 +279,13 @@ std::unique_ptr<TextStmtNode> Parser::parseTextStmt() {
         throw std::runtime_error("Expected newline after text string at line " + 
                                std::to_string(peek().line));
     }
+    consume(); // consume newline
     
     return std::make_unique<TextStmtNode>(text);
 }
 
 std::unique_ptr<SaveStmtNode> Parser::parseSaveStmt(int currentIndent) {
-    consume();
+    consume(); // consume @save
     
     if (peek().type != TokenType::IDENTIFIER) {
         throw std::runtime_error("Expected identifier after @save at line " + 
@@ -296,12 +299,13 @@ std::unique_ptr<SaveStmtNode> Parser::parseSaveStmt(int currentIndent) {
         throw std::runtime_error("Expected colon after component name at line " + 
                                std::to_string(peek().line));
     }
-    consume();
+    consume(); // consume colon
     
     if (peek().type != TokenType::NEWLINE) {
         throw std::runtime_error("Expected newline after colon at line " + 
                                std::to_string(peek().line));
     }
+    consume(); // consume newline
     
     component->body = parseBlock(currentIndent);
     
@@ -309,7 +313,7 @@ std::unique_ptr<SaveStmtNode> Parser::parseSaveStmt(int currentIndent) {
 }
 
 std::unique_ptr<LoadStmtNode> Parser::parseLoadStmt(int currentIndent) {
-    consume();
+    consume(); // consume @load
     
     if (peek().type != TokenType::IDENTIFIER) {
         throw std::runtime_error("Expected identifier after @load at line " + 
@@ -320,27 +324,29 @@ std::unique_ptr<LoadStmtNode> Parser::parseLoadStmt(int currentIndent) {
     auto component = std::make_unique<LoadStmtNode>(componentName);
 
     if (peek().type == TokenType::WITH) {
-        consume();
+        consume(); // consume WITH
 
         if (peek().type != TokenType::COLON) {
             throw std::runtime_error("Expected colon after 'with' at line " + 
                                    std::to_string(peek().line));
         }
-        consume();
+        consume(); // consume colon
         
         if (peek().type != TokenType::NEWLINE) {
             throw std::runtime_error("Expected newline after colon at line " + 
                                    std::to_string(peek().line));
         }
+        consume(); // consume newline
 
         component->parameters = std::move(parseParameters(currentIndent));
+    } else {
+        if (peek().type != TokenType::NEWLINE) {
+            throw std::runtime_error("Expected newline after load statement at line " + 
+                                   std::to_string(peek().line));
+        }
+        consume(); // consume newline
     }
-    
-    if (peek().type != TokenType::NEWLINE && peek().type != TokenType::END_OF_FILE) {
-        throw std::runtime_error("Expected newline after component name at line " + 
-                               std::to_string(peek().line));
-    }
-    
+
     return component;
 }
 
@@ -381,7 +387,7 @@ std::vector<std::unique_ptr<ParameterNode>> Parser::parseParameters(int parentIn
             throw std::runtime_error("Expected colon after parameter name at line " + 
                                    std::to_string(peek().line));
         }
-        consume();
+        consume(); // consume colon
         
         if (peek().type != TokenType::STRING && peek().type != TokenType::IDENTIFIER) {
             throw std::runtime_error("Expected value after colon at line " + 

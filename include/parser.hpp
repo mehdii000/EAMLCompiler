@@ -2,15 +2,21 @@
 #include "lexer.hpp"
 #include <memory>
 #include <vector>
+#include <string>
 
 struct ASTNode {
     virtual ~ASTNode() = default;
     virtual void print(int indent = 0) const = 0;
+
+    // Return pointer to an owned children vector if this node type contains ASTNode children.
+    // Default: no children.
+    virtual std::vector<std::unique_ptr<ASTNode>>* children() { return nullptr; }
 };
 
 struct RootNode : ASTNode {
     std::vector<std::unique_ptr<ASTNode>> statements;
     void print(int indent = 0) const override;
+    std::vector<std::unique_ptr<ASTNode>>* children() override { return &statements; }
 };
 
 struct TitleStmtNode : ASTNode {
@@ -24,6 +30,7 @@ struct ScreenStmtNode : ASTNode {
     std::vector<std::unique_ptr<ASTNode>> body;
     ScreenStmtNode(const std::string& n) : name(n) {}
     void print(int indent = 0) const override;
+    std::vector<std::unique_ptr<ASTNode>>* children() override { return &body; }
 };
 
 struct TextStmtNode : ASTNode {
@@ -37,6 +44,7 @@ struct ParameterNode : ASTNode {
     std::string value;
     ParameterNode(const std::string& n, const std::string& v) : name(n), value(v) {}
     void print(int indent = 0) const override;
+    // ParameterNode is a leaf; no children() override.
 };
 
 struct SaveStmtNode : ASTNode {
@@ -44,6 +52,7 @@ struct SaveStmtNode : ASTNode {
     std::vector<std::unique_ptr<ASTNode>> body;
     SaveStmtNode(const std::string& n) : name(n) {}
     void print(int indent = 0) const override;
+    std::vector<std::unique_ptr<ASTNode>>* children() override { return &body; }
 };
 
 struct LoadStmtNode : ASTNode {
@@ -51,6 +60,8 @@ struct LoadStmtNode : ASTNode {
     std::vector<std::unique_ptr<ParameterNode>> parameters;
     LoadStmtNode(const std::string& n) : name(n) {}
     void print(int indent = 0) const override;
+    // LoadStmtNode has parameters (ParameterNode) but not ASTNode-body children
+    // so we don't expose children() for structural AST replacement purposes.
 };
 
 void printPrettyTree(const RootNode* root);
