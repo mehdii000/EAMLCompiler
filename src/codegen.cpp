@@ -84,6 +84,15 @@ std::unique_ptr<ASTNode> CodeGenerator::cloneNode(const ASTNode* node) {
         return std::make_unique<GenericAtStmtNode>(g->name);
     }
 
+    // Layout
+    if (auto* l = dynamic_cast<const LayoutStmtNode*>(node)) {
+        auto out = std::make_unique<LayoutStmtNode>();
+        out->layout = l->layout;
+        for (auto& c : l->body)
+            out->body.push_back(cloneNode(c.get()));
+        return out;
+    }
+    
 
     throw std::runtime_error("Unknown AST node type in cloneNode()");
 }
