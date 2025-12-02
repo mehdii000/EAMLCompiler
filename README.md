@@ -4,8 +4,6 @@ EAML is a lightweight, beginner-friendly markup language that simplifies web des
 
 ## EAML - Eaml's Average Markdown Language
 
-EAML makes web design accessible. Write less verbose, resuable, readable code and get subjectvly the same HTML/CSS results.
-
 **Before (HTML):**
 ```html
 <!DOCTYPE html>
