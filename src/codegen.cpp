@@ -252,11 +252,23 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
         }
         else if (auto* generic = dynamic_cast<const GenericAtStmtNode*>(node)) {
             std::string html_header = generic->name;
+            std::string txt = generic->value;
+            
+            // Replace placeholders like {name} with context values
+            for (auto& [k, v] : context) {
+                size_t pos = 0;
+                std::string ph = "{" + k + "}";
+                while ((pos = txt.find(ph, pos)) != std::string::npos) {
+                    txt.replace(pos, ph.length(), v);
+                    pos += v.length();
+                }
+            }
+
             for (auto& [k, v] : context) {
                 html_header += " " + k + "=\"" + v + "\"";
             }
             out << "<" << html_header << ">\n";
-            out << generic->value;
+            out << txt;
             out << "</" << html_header << ">\n";
         }
         else if (auto* screen = dynamic_cast<const ScreenStmtNode*>(node)) {
