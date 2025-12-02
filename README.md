@@ -1,12 +1,8 @@
-# EAML - Eaml's Average Markdown Language
+## About
 
-> A human-readable markup language that compiles to HTML/CSS, designed for teaching web design to beginners.
+EAML is a lightweight, beginner-friendly markup language that simplifies web design. It allows you to create reusable components and clean layouts with minimal syntax, compiling directly to HTML/CSS.
 
-[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
-
----
-
-## 🎯 What is EAML?
+## EAML - Eaml's Average Markdown Language
 
 EAML makes web design accessible. Write less verbose, resuable, readable code and get subjectvly the same HTML/CSS results.
 
@@ -241,7 +237,7 @@ Open `output.html` in your browser! 🎉
 - [x] Basic lexer and parser
 - [x] Component system (@load & @save)
 - [x] @load with parameters (Ex. name: "Adam")
-- [x] Generic html components as @<component> "value"
+- [x] Generic html components as @component "value"
 
 - [ ] Layout containers (row, stack, center)
 - [ ] Pre-definied generic styling to order everything around
