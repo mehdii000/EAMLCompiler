@@ -239,12 +239,16 @@ Open `output.html` in your browser! 🎉
 
 - [x] Think of the project and think about starting it
 - [x] Basic lexer and parser
-- [x] Component system
+- [x] Component system (@load & @save)
+- [x] @load with parameters (Ex. name: "Adam")
+- [x] Generic html components as @<component> "value"
+
 - [ ] Layout containers (row, stack, center)
-- [ ] Modifier system
-- [ ] Loops (`@for`)
-- [ ] CSS framework integration
-- [ ] Live preview server
+- [ ] Pre-definied generic styling to order everything around
+
+- [ ] Modifier system (Ex. [rounded, shadowed])
+- [ ] Basic inline css
+
 - [ ] VS Code syntax highlighting
 
 ## 📝 Language Specification
