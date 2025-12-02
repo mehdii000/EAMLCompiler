@@ -213,29 +213,38 @@ std::vector<std::unique_ptr<ASTNode>> Parser::parseBlock(int parentIndent) {
     skipNewlines();
     
     while (peek().type != TokenType::END_OF_FILE) {
+
+        // Count indentation
         int indent = 0;
         int offset = 0;
         while (peek(offset).type == TokenType::INDENT) {
             indent++;
             offset++;
         }
-        
-        if (indent < blockIndent) {
+
+        // Case 1: blank line → skip it
+        if (peek(offset).type == TokenType::NEWLINE) {
+            // consume the entire blank line
+            for (int i = 0; i < offset; i++)
+                consume();
+            // consume NEWLINE
+            consume();
+            continue;        // do not treat as a statement
+        }
+
+        // Case 2: indentation mismatch
+        if (indent < blockIndent)
             break;
-        }
-        
-        if (indent > blockIndent) {
-            throw std::runtime_error("Unexpected indentation at line " + 
-                                   std::to_string(peek().line));
-        }
-        
+
+        if (indent > blockIndent)
+            throw std::runtime_error("Unexpected indentation at line " +
+                                    std::to_string(peek().line));
+
+        // Parse normally
         auto stmt = parseStatement(blockIndent);
-        if (stmt) {
-            statements.push_back(std::move(stmt));
-        } else {
-            break;
-        }
-        
+        if (stmt) statements.push_back(std::move(stmt));
+        else break;
+
         skipNewlines();
     }
     

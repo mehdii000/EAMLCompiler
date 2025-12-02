@@ -81,12 +81,13 @@ std::unique_ptr<ASTNode> CodeGenerator::cloneNode(const ASTNode* node) {
 
     // GenericAt
     if (auto* g = dynamic_cast<const GenericAtStmtNode*>(node)) {
-        return std::make_unique<GenericAtStmtNode>(g->name);
+        return std::make_unique<GenericAtStmtNode>(g->name, g->value);
     }
 
     // Layout
     if (auto* l = dynamic_cast<const LayoutStmtNode*>(node)) {
         auto out = std::make_unique<LayoutStmtNode>();
+        out->bordered = true;
         out->layout = l->layout;
         for (auto& c : l->body)
             out->body.push_back(cloneNode(c.get()));
@@ -234,7 +235,7 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
                     pos += v.length();
                 }
             }
-            out << "<div>" << txt << "</div>\n";
+            out << "<p>" << txt << "</p>\n";
         }
         else if (auto* generic = dynamic_cast<const GenericAtStmtNode*>(node)) {
             std::string html_header = generic->name;
@@ -251,7 +252,14 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
                 renderNode(stmt.get(), context);
             out << "</div>\n";
         } else if (auto* layout = dynamic_cast<const LayoutStmtNode*>(node)) {
-            out << "<div class=\"layout\" id=\"" << layout->layout << "\">\n";
+
+            if (layout->bordered == true) {
+                out << "<div class=\"layout main-borders\" id=\"" << layout->layout << "\">\n";
+            } else {
+                out << "<div class=\"layout\" id=\"" << layout->layout << "\">\n";
+            }
+
+
             for (auto& stmt : layout->body)
                 renderNode(stmt.get(), context);
             out << "</div>\n";

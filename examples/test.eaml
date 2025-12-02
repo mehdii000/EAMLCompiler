@@ -9,12 +9,17 @@
     @load buttons
 
 @save buttons:
-    @text "imagine a button 1"
-    @text "imagine a button 2"
+    @button "Click 1"
+    @button "Click 2"
+    @button "Click 3"
+    @h1 "hey"
 
 # A screen is a <div> that automatically resizes and adapts to other screens
 # unless another screen is marked with a [hidden] modifier
 @screen main:
+    @h1 "hey"
+    @button "hey"
     @load card with:
         name: "hey"
     @text "Hello"
+    @load buttons

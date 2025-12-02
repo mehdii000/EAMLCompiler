@@ -24,11 +24,11 @@
         @center:
             @h1 "Product API Reference"
             @text "Complete guide to integrating our RESTful API"
-        
+
         @row:
             @left:
                 @stack:
-                    @text "NAVIGATION"
+                    @text "NAVIGATION WITH MEHDI"
                     @load nav_button
             
             @stack:
@@ -41,7 +41,7 @@
                 @stack:
                     @h2 "Response Format"
                     @text "All responses return JSON with standard fields:"
-                    @text "{ status, data, error, timestamp }"
+                    @text "status, data, error, timestamp"
                     @button "View Full Schema"
                 
                 @row:

@@ -66,13 +66,14 @@ struct LoadStmtNode : ASTNode {
 
 struct GenericAtStmtNode : ASTNode {
     std::string name;
-    std::string value;
+    std::string value = "";
     GenericAtStmtNode(const std::string& n, const std::string& v = "") : name(n), value(v) {}
     void print(int indent = 0) const override;
 };
 
 struct LayoutStmtNode : ASTNode {
     std::string layout;
+    bool bordered = false;
     std::vector<std::unique_ptr<ASTNode>> body;
     void print(int indent = 0) const override;
 };
