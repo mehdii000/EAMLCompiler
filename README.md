@@ -11,6 +11,7 @@ EAML is a lightweight, beginner-friendly markup language that simplifies web des
 <head>
 <meta charset="UTF-8">
 <title>Simple Title</title>
+
 </head>
 <body>
     <div class="screen" id="main">

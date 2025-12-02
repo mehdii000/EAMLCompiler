@@ -236,7 +236,12 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
             for (auto& stmt : screen->body)
                 renderNode(stmt.get(), context);
             out << "</div>\n";
-        } 
+        } else if (auto* layout = dynamic_cast<const LayoutStmtNode*>(node)) {
+            out << "<div class=\"layout\" id=\"" << layout->layout << "\">\n";
+            for (auto& stmt : layout->body)
+                renderNode(stmt.get(), context);
+            out << "</div>\n";
+        }
         else if (auto* load = dynamic_cast<const LoadStmtNode*>(node)) {
             // Build context from parameters
             std::unordered_map<std::string, std::string> paramContext;
@@ -249,7 +254,7 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
                 for (auto& saved : it->second)
                     renderNode(saved.get(), paramContext);
             }
-        } 
+        }
         else if (auto* save = dynamic_cast<const SaveStmtNode*>(node)) {
             // Usually saves are templates; don't render directly
         }

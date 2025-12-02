@@ -71,6 +71,12 @@ struct GenericAtStmtNode : ASTNode {
     void print(int indent = 0) const override;
 };
 
+struct LayoutStmtNode : ASTNode {
+    std::string layout;
+    std::vector<std::unique_ptr<ASTNode>> body;
+    void print(int indent = 0) const override;
+};
+
 void printPrettyTree(const RootNode* root);
 
 class Parser {
@@ -92,6 +98,7 @@ private:
     std::unique_ptr<SaveStmtNode> parseSaveStmt(int currentIndent);
     std::unique_ptr<LoadStmtNode> parseLoadStmt(int currentIndent);
     std::unique_ptr<GenericAtStmtNode> parseGenericAtStmt(int currentIndent);
+    std::unique_ptr<LayoutStmtNode> parseLayoutStmt(int currentIndent, TokenType type);
 
 public:
     Parser(const std::vector<Token>& tokens);

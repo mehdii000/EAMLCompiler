@@ -121,6 +121,14 @@ void GenericAtStmtNode::print(int indent) const {
     std::cout << "GenericAtStmt: " << name << std::endl;
 }
 
+void LayoutStmtNode::print(int indent) const {
+    printIndent(indent);
+    std::cout << "LayoutStmt: " << layout << std::endl;
+    for (const auto& stmt : body) {
+        stmt->print(indent + 1);
+    }
+}
+
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
 
@@ -187,6 +195,12 @@ std::unique_ptr<ASTNode> Parser::parseStatement(int currentIndent) {
             return parseLoadStmt(currentIndent);
         case TokenType::AT_IDENTIFIER:
             return parseGenericAtStmt(currentIndent);
+        case TokenType::AT_ROW:
+        case TokenType::AT_STACK:
+        case TokenType::AT_LEFT:
+        case TokenType::AT_RIGHT:
+        case TokenType::AT_CENTER:
+            return parseLayoutStmt(currentIndent, peek().type);
         default:
             return nullptr;
     }
@@ -426,4 +440,52 @@ std::vector<std::unique_ptr<ParameterNode>> Parser::parseParameters(int parentIn
     }
     
     return parameters;
+}
+
+std::unique_ptr<LayoutStmtNode> Parser::parseLayoutStmt(int currentIndent, TokenType type) {
+    std::string layout = "";
+
+    if (peek().type != type) {
+        throw std::runtime_error("Expected layout type at line " +
+                               std::to_string(peek().line));
+    }
+
+    switch (type) {
+        case TokenType::AT_ROW:
+            layout = "row";
+            break;
+        case TokenType::AT_STACK:
+            layout = "stack";
+            break;        case TokenType::AT_LEFT:
+            layout = "left";
+            break;
+        case TokenType::AT_RIGHT:
+            layout = "right";
+            break;
+        case TokenType::AT_CENTER:
+            layout = "center";
+            break;
+        default:
+            throw std::runtime_error("Unknown layout type");
+    }
+    consume(); // consume layout type token
+
+    auto layoutNode = std::make_unique<LayoutStmtNode>();
+    layoutNode->layout = layout;
+
+    if (peek().type != TokenType::COLON) {
+        throw std::runtime_error("Expected colon after layout type at line " +
+                               std::to_string(peek().line));
+    }
+    consume(); // consume colon
+
+    if (peek().type != TokenType::NEWLINE) {
+        throw std::runtime_error("Expected newline after colon at line " +
+                               std::to_string(peek().line));
+    }
+    consume(); // consume newline
+
+    layoutNode->body = parseBlock(currentIndent);
+
+    return layoutNode;
 }

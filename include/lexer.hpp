@@ -15,6 +15,9 @@ enum class TokenType {
     AT_ROW,
     AT_STACK,
     AT_TEXT,
+    AT_CENTER,
+    AT_LEFT,
+    AT_RIGHT,
 
     AT_IDENTIFIER,
 
@@ -58,6 +61,9 @@ static const std::unordered_map<std::string, TokenType> BUILTIN_AT_TOKENS = {
     {"load", TokenType::AT_LOAD},
     {"row", TokenType::AT_ROW},
     {"stack", TokenType::AT_STACK},
+    {"center", TokenType::AT_CENTER},
+    {"left", TokenType::AT_LEFT},
+    {"right", TokenType::AT_RIGHT},
     {"text", TokenType::AT_TEXT}
 };
 
