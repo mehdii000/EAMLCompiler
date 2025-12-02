@@ -1,14 +1,19 @@
 @title "Simple Title"
 
+@save card:
+    @center:
+        @text "hello"
+
 @screen main:
     @row:
         @left:
             @text "Hello World"
-        @center:
+        @load card
     @stack:
         @right:
             @button "hey"
             @h1 "there"
-            @button click me
+            @button "click me"
         @row:
             @text "this is a test"
+            @load card
