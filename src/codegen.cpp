@@ -211,7 +211,12 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
         }
     }
 
-    out << "</title>\n</head>\n<body>\n";
+    out << "</title>\n</head>";
+
+    // Prototyping css
+    out << "<link rel=\"stylesheet\" href=\"style.css\">\n";
+
+    out << "<body>\n";
 
     // Recursive helper lambda
     std::function<void(const ASTNode*, const std::unordered_map<std::string, std::string>&)> renderNode;

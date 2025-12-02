@@ -1,19 +1,58 @@
-@title "Simple Title"
+@title "API Documentation"
 
-@save card:
-    @center:
-        @text "hello"
+@save nav_button:
+    @button "Overview"
+    @button "Authentication"
+    @button "Endpoints"
+    @button "Examples"
+
+@save card_section:
+    @stack:
+        @h2 "Getting Started"
+        @text "Install the SDK using your preferred package manager:"
+        @text "npm install api-client"
+        @text "Then import and initialize the client with your API key."
+
+@save code_example:
+    @stack:
+        @h3 "Basic Usage"
+        @text "const client = new APIClient({ apiKey: 'your-key' });"
+        @text "const response = await client.get('/users');"
 
 @screen main:
-    @row:
-        @left:
-            @text "Hello World"
-        @load card
     @stack:
-        @right:
-            @button "hey"
-            @h1 "there"
-            @button "click me"
+        @center:
+            @h1 "Product API Reference"
+            @text "Complete guide to integrating our RESTful API"
+        
         @row:
-            @text "this is a test"
-            @load card
+            @left:
+                @stack:
+                    @text "NAVIGATION"
+                    @load nav_button
+            
+            @stack:
+                @load card_section
+                
+                @row:
+                    @load code_example
+                    @load code_example
+                
+                @stack:
+                    @h2 "Response Format"
+                    @text "All responses return JSON with standard fields:"
+                    @text "{ status, data, error, timestamp }"
+                    @button "View Full Schema"
+                
+                @row:
+                    @left:
+                        @stack:
+                            @h3 "Rate Limits"
+                            @text "Standard: 1000 req/hour"
+                            @text "Premium: 10000 req/hour"
+                    
+                    @right:
+                        @stack:
+                            @h3 "Status"
+                            @button "API Status"
+                            @text "All systems operational"
