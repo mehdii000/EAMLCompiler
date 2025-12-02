@@ -1,25 +1,37 @@
-@title "My App"
+@title "Product Dashboard"
 
-# this a comment
-# the lexer ignores comments
+# Global reusable UI blocks
+@save productCard:
+    @h2 "{title}"
+    @text "{description}"
+    @button "View Details"
+    @button "Add to Cart"
 
-@save card: # this is a card
-    @text "hey {name}"
-    @text "refrence"
-    @load buttons
+@save header:
+    @h1 "Inventory Manager"
+    @text "Manage your products and view details."
 
-@save buttons:
-    @button "Click 1"
-    @button "Click 2"
-    @button "Click 3"
-    @h1 "hey"
+@save footer:
+    @text "2025 MyCompany — All rights reserved."
 
-# A screen is a <div> that automatically resizes and adapts to other screens
-# unless another screen is marked with a [hidden] modifier
-@screen main:
-    @h1 "hey"
-    @button "hey"
-    @load card with:
-        name: "hey"
-    @text "Hello"
-    @load buttons
+
+# A list of products
+@save products:
+    @button "Laptops"
+    @button "Smartphones"
+    @button "Accessories"
+
+
+# Main screen of the app
+@screen home:
+    @load header
+    
+    @h2 "Categories"
+    @load products
+    @h2 "Featured Product"
+    
+    @load productCard with:
+        title: "UltraBook Pro 14"
+        description: "Lightweight, powerful, and perfect for development."
+    
+    @load footer

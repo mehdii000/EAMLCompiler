@@ -20,7 +20,20 @@ void replaceNodeValueWithAppropriateContext(ASTNode* node, const std::unordered_
             }
         }
         param->text = txt;
+    } else if (auto* generic = dynamic_cast<GenericAtStmtNode*>(node)) {
+        // Replace generic->value {param} with its value
+        std::string txt = generic->value;
+        for (auto& [k, v] : context) {
+            size_t pos = 0;
+            std::string ph = "{" + k + "}";
+            while ((pos = txt.find(ph, pos)) != std::string::npos) {
+                txt.replace(pos, ph.length(), v);
+                pos += v.length();
+            }
+        }
+        generic->value = txt;
     }
+
 
     if (node->children()) {
         for (auto& child : *node->children()) {
