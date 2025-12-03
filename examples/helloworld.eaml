@@ -1,58 +1,43 @@
-@title "API Documentation"
+@title "EAML Documentation — Learn EAML"
 
-@save nav_button:
-    @button "Overview"
-    @button "Authentication"
-    @button "Endpoints"
+# Reusable components
+@save siteHeader:
+    @h1 "EAML — Easy App Markup Language"
+    @text "Small, human-friendly DSL for composing UI screens and reusable components."
+
+@save siteNav:
+    @button "Home"
+    @button "Getting Started"
+    @button "Syntax"
     @button "Examples"
+    @button "Reference"
+    @button "Playground"
 
-@save card_section:
-    @stack:
-        @h2 "Getting Started"
-        @text "Install the SDK using your preferred package manager:"
-        @text "npm install api-client"
-        @text "Then import and initialize the client with your API key."
+@save footer:
+    @text "© 2025 EAML Project — Minimal, composable UI DSL."
 
-@save code_example:
-    @stack:
-        @h3 "Basic Usage"
-        @text "const client = new APIClient({ apiKey: 'your-key' });"
-        @text "const response = await client.get('/users');"
+@save codeBlock:
+    @h2 "{title}"
+    @text "{code}"
 
-@screen main:
-    @stack:
-        @center:
-            @h1 "Product API Reference"
-            @text "Complete guide to integrating our RESTful API"
+# Short intro card used on multiple pages
+@save introCard:
+    @h2 "{heading}"
+    @text "{summary}"
 
-        @row:
-            @left:
-                @stack:
-                    @text "NAVIGATION WITH MEHDI"
-                    @load nav_button
-            
-            @stack:
-                @load card_section
-                
-                @row:
-                    @load code_example
-                    @load code_example
-                
-                @stack:
-                    @h2 "Response Format"
-                    @text "All responses return JSON with standard fields:"
-                    @text "status, data, error, timestamp"
-                    @button "View Full Schema"
-                
-                @row:
-                    @left:
-                        @stack:
-                            @h3 "Rate Limits"
-                            @text "Standard: 1000 req/hour"
-                            @text "Premium: 10000 req/hour"
-                    
-                    @right:
-                        @stack:
-                            @h3 "Status"
-                            @button "API Status"
-                            @text "All systems operational"
+# Home screen (landing)
+@screen home:
+    @load siteHeader
+    @h2 "What is EAML?"
+    @text "EAML (Easy App Markup Language) is a small DSL to declare screens, components, and simple parameterized composition for static UIs or for generating HTML."
+    @h2 "Quick actions"
+    @button "Read Getting Started"
+    @button "View Syntax"
+    @button "Open Examples"
+
+    @h2 "Why use EAML?"
+    @text "— Human readable, indentation-based blocks."
+    @text "— Reusable components via @save and @load."
+    @text "— Simple integration path: parse → AST → renderer (HTML/JSX)."
+
+    @load footer

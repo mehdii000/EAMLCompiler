@@ -4,6 +4,7 @@
 #include <sstream>
 #include <functional>
 #include <fstream>
+#include "codeutils.hpp"
 
 void replaceNodeValueWithAppropriateContext(ASTNode* node, const std::unordered_map<std::string, std::string>& context) {
     if (!node) return;
@@ -228,7 +229,9 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
     out << "</title>\n</head>";
 
     // Prototyping css
-    out << "<link rel=\"stylesheet\" href=\"style.css\">\n";
+    out << "<style>\n";
+    out << readFile("style.css"); 
+    out << "</style>\n";
 
     out << "<body>\n";
 
