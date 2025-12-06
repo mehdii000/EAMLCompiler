@@ -6,12 +6,7 @@
     @text "Small, human-friendly DSL for composing UI screens and reusable components."
 
 @save siteNav:
-    @button "Home"
-    @button "Getting Started"
-    @button "Syntax"
-    @button "Examples"
-    @button "Reference"
-    @button "Playground"
+    @text "EAML (Easy App Markup Language) is a small DSL to declare screens, components, and simple parameterized composition for static UIs or for generating HTML."
 
 @save footer:
     @text "© 2025 EAML Project — Minimal, composable UI DSL."
@@ -29,7 +24,8 @@
 @screen home:
     @load siteHeader
     @h2 "What is EAML?"
-    @text "EAML (Easy App Markup Language) is a small DSL to declare screens, components, and simple parameterized composition for static UIs or for generating HTML."
+    @center:
+        @load siteNav
     @h2 "Quick actions"
     @button "Read Getting Started"
     @button "View Syntax"

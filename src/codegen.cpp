@@ -204,7 +204,6 @@ void CodeGenerator::generate(RootNode& root) {
     if (outFile.is_open()) {
         outFile << generateHTMLOutput(root);
         outFile.close();
-        std::cout << "HTML output generated successfully to output.html" << std::endl;
     } else {
         std::cerr << "Error: Unable to open output.html for writing." << std::endl;
     }
