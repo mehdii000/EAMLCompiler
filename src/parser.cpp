@@ -420,6 +420,7 @@ std::unique_ptr<GenericAtStmtNode> Parser::parseGenericAtStmt(int currentIndent)
         body = std::vector<std::unique_ptr<ASTNode>>();
     }
 
+    // TODO: Fix this bug right here
     if (peek().type != TokenType::NEWLINE) {
         throw std::runtime_error("Expected newline after generic at statement at line " + 
             std::to_string(peek().line));
