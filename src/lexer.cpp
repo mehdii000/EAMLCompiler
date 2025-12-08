@@ -167,6 +167,12 @@ std::vector<Token> Lexer::tokenize() {
                 break;
             }
 
+            case '=': {
+                tokens.push_back(Token{TokenType::EQUAL, "=", line});
+                pos++;
+                break;
+            }
+
             case '{':
             case '}':
                 pos++;

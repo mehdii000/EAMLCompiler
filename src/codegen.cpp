@@ -95,7 +95,12 @@ std::unique_ptr<ASTNode> CodeGenerator::cloneNode(const ASTNode* node) {
 
     // GenericAt
     if (auto* g = dynamic_cast<const GenericAtStmtNode*>(node)) {
-        return std::make_unique<GenericAtStmtNode>(g->name, g->value);
+        auto out = std::make_unique<GenericAtStmtNode>(g->name, g->value);
+        for (auto& [k, v] : g->htmlData)
+            out->htmlData.push_back(std::make_pair(k, v));
+        for (auto& c : g->body)
+            out->body.push_back(cloneNode(c.get()));
+        return out;
     }
 
     // Layout
@@ -256,6 +261,7 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
             std::string html_header = generic->name;
             std::string txt = generic->value;
             
+            
             // Replace placeholders like {name} with context values
             for (auto& [k, v] : context) {
                 size_t pos = 0;
@@ -269,7 +275,14 @@ std::string CodeGenerator::generateHTMLOutput(RootNode& root) {
             for (auto& [k, v] : context) {
                 html_header += " " + k + "=\"" + v + "\"";
             }
-            out << "<" << html_header << ">\n";
+            out << "<" << html_header;
+
+            // BLAH BLAH
+            for (const auto& [k, v] : generic->htmlData) {
+                out << " " << k << "=\"" << v << "\"";
+            }
+
+            out << ">\n";
             out << txt;
             out << "</" << html_header << ">\n";
         }

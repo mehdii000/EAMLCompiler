@@ -31,6 +31,7 @@ enum class TokenType {
 
     COLON,
     COMMA,
+    EQUAL,
     LBRACKET,
     RBRACKET,
     END_OF_FILE

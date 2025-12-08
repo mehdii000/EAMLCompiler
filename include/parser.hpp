@@ -11,6 +11,9 @@ struct ASTNode {
     // Return pointer to an owned children vector if this node type contains ASTNode children.
     // Default: no children.
     virtual std::vector<std::unique_ptr<ASTNode>>* children() { return nullptr; }
+
+    // HTML Data
+    virtual std::vector<std::pair<std::string, std::string>>* htmlData() { return nullptr; }
 };
 
 struct RootNode : ASTNode {
@@ -67,8 +70,11 @@ struct LoadStmtNode : ASTNode {
 struct GenericAtStmtNode : ASTNode {
     std::string name;
     std::string value = "";
+    std::vector<std::unique_ptr<ASTNode>> body;
     GenericAtStmtNode(const std::string& n, const std::string& v = "") : name(n), value(v) {}
     void print(int indent = 0) const override;
+    std::vector<std::pair<std::string, std::string>> htmlData;
+    std::vector<std::unique_ptr<ASTNode>>* children() override { return &body; }
 };
 
 struct LayoutStmtNode : ASTNode {

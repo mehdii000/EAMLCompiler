@@ -40,6 +40,8 @@ void run(const char* path) {
     CodeGenerator codegen;
     BENCHMARK([&]() { codegen.generate(*ast); }, "Generating Code");
 
+    printPrettyTree(ast.get());
+
     std::cout << "Exported to output.html\n";
 }
 

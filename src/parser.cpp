@@ -52,7 +52,11 @@ static void printTree(const ASTNode* node, const std::string& prefix = "", bool 
                      i == load->parameters.size() - 1);
         }
     } else if (auto* generic = dynamic_cast<const GenericAtStmtNode*>(node)) {
-        std::cout << "@" << generic->name << " ARGS MISSING" << std::endl;
+        std::cout << "@" << generic->name << " ";
+        for (const auto& [k, v] : generic->htmlData) {
+            std::cout << k << "=" << v << " ";
+        }
+        std::cout << std::endl;
     }
     else if (auto* param = dynamic_cast<const ParameterNode*>(node)) {
         std::cout << param->name << ": " << param->value << std::endl;
@@ -118,7 +122,15 @@ void LoadStmtNode::print(int indent) const {
 
 void GenericAtStmtNode::print(int indent) const {
     printIndent(indent);
-    std::cout << "GenericAtStmt: " << name << std::endl;
+    std::cout << "GenericAtStmt: " << name << " ";
+    for (const auto& [k, v] : htmlData) {
+        std::cout << k << "=" << v << " ";
+    }
+    std::cout << std::endl;
+    for (const auto& stmt : body) {
+        stmt->print(indent + 1);
+    }
+    std::cout << std::endl;
 }
 
 void LayoutStmtNode::print(int indent) const {
@@ -389,13 +401,36 @@ std::unique_ptr<GenericAtStmtNode> Parser::parseGenericAtStmt(int currentIndent)
     std::string genericName = consume().value.value(); // consume and return @<value>
 
     std::string headerValue = peek().type == TokenType::STRING ? consume().value.value() : "";
+    std::vector<std::pair<std::string, std::string>> htmlParams;
 
-    if (peek().type != TokenType::NEWLINE)
+    while (peek().type == TokenType::IDENTIFIER
+           && peek(1).type == TokenType::EQUAL
+           && peek(2).type == TokenType::STRING) {
+            std::string htmlParam = consume().value.value();
+            consume(); // consume =
+            std::string htmlValue = consume().value.value();
+            htmlParams.push_back(std::make_pair(htmlParam, htmlValue));
+    }
+
+    std::vector<std::unique_ptr<ASTNode>> body;
+    if (peek().type == TokenType::COLON) {
+        consume(); // consume colon
+        body = parseBlock(currentIndent);
+    } else {
+        body = std::vector<std::unique_ptr<ASTNode>>();
+    }
+
+    if (peek().type != TokenType::NEWLINE) {
         throw std::runtime_error("Expected newline after generic at statement at line " + 
-                               std::to_string(peek().line));
+            std::to_string(peek().line));
+    }
     consume(); // consume newline
+    
+    auto generic = std::make_unique<GenericAtStmtNode>(genericName, headerValue);
+    generic->htmlData = std::move(htmlParams);
+    generic->body = std::move(body);
+    return generic;
 
-    return std::make_unique<GenericAtStmtNode>(genericName, headerValue);
 }
 
 std::vector<std::unique_ptr<ParameterNode>> Parser::parseParameters(int parentIndent) {

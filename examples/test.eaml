@@ -1,16 +1,5 @@
-@title "heyt"
-
-@save nav_button:
-    @text "{val}"
-
+@title "hey"
 
 @screen main:
-    @load nav_button with:
-        val: "Overview"
-    @stack:
-        @center:
-            @h1 "Product API Reference"
-            @load nav_button with:
-                val: "Overview"
-            @text "Complete guide to integrating our RESTful API"
-
+    @div
+    @h1 "hey"
