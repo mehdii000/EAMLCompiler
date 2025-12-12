@@ -238,7 +238,7 @@ Open `output.html` in your browser! 🎉
 - [x] @load with parameters (Ex. name: "Adam")
 - [x] Generic html components as @component "value"
 
-- [ ] Layout containers (row, stack, center)
+- [x] Layout containers (row, stack, center)
 - [ ] Pre-definied generic styling to order everything around
 
 - [ ] Modifier system (Ex. [rounded, shadowed])
